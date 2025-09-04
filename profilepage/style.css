@@ -1,0 +1,32 @@
+body {
+  background-color: #141414;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  color: #e50914;
+  margin-top: 40px;
+}
+
+.card {
+  background-color: #000;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  border-radius: 8px;
+}
+
+.name {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #fff;
+}
