@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* ===== NAVBAR ===== */
+.navbar-custom {
+  background: #000;
+  height: 60px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.logo img {
+  height: 40px;
+  width: auto;
+}
+
+/* ===== LINKS ===== */
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.nav-links a:hover {
+  color: #e50914;
+}
+
+/* ===== RIGHT SECTION ===== */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.icon {
+  height: 24px;
+  width: 24px;
+  cursor: pointer;
+}
+
+.profile-pic {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  cursor: pointer;
+}
