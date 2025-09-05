@@ -17,5 +17,8 @@ toDoLogInBtn.addEventListener("click", () => {
     return;
   }
 
-  errorMsg.textContent = "Login succesful!";
+  errorMsg.textContent = "Login succesful!"
+  localStorage.setItem("login-user",username);
+  window.location.href = "../profilepage/profile.html"
+  ;
 });
