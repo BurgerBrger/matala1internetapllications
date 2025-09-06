@@ -6,15 +6,17 @@
   <title>NavBar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
 </head>
 <body>
   <header class="navbar-custom">
-    <!-- לוגו -->
+    
     <div class="logo">
       <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="logo" />
     </div>
 
-    <!-- קישורים -->
+   
     <nav class="nav-links">
       <a href="#">HOME</a>
       <a href="#">TV SHOWS</a>
@@ -23,12 +25,18 @@
       <a href="#">POPULAR</a>
     </nav>
 
-    <!-- אייקונים צד ימין -->
+    
     <div class="right-section">
-      <img src="https://img.icons8.com/ios-filled/24/ffffff/search.png" alt="search" class="icon">
-      <img src="https://img.icons8.com/ios-filled/24/ffffff/bell.png" alt="notification" class="icon">
-      <img src="https://i.pravatar.cc/40" alt="profile" class="profile-pic">
+      <i class="bi bi-search icon"></i>
+      <i class="bi bi-bell-fill icon"></i>
+      <i class="bi bi-person-circle icon"></i>
+      <button id="logoutBtn" class="logout-btn">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
     </div>
   </header>
+
+  <script src="script.js"></script>
+  
 </body>
 </html>

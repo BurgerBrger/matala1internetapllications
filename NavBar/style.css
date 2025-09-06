@@ -47,16 +47,26 @@ body {
   gap: 15px;
 }
 
+/* אייקונים של Bootstrap */
 .icon {
-  height: 24px;
-  width: 24px;
+  font-size: 22px;     /* גודל האייקון */
+  color: #fff;         /* צבע לבן */
   cursor: pointer;
+  transition: color 0.3s;
+}
+.icon:hover {
+  color: #e50914;      /* אדום בהובר */
 }
 
-.profile-pic {
-  height: 35px;
-  width: 35px;
-  border-radius: 50%;
-  border: 2px solid #fff;
+/* כפתור Logout */
+.logout-btn {
+  background: transparent;
+  border: none;
   cursor: pointer;
+  font-size: 22px;     /* גודל אייקון */
+  color: #fff;
+  transition: color 0.3s;
+}
+.logout-btn:hover {
+  color: #e50914;
 }
