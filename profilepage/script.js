@@ -29,7 +29,7 @@ profiles.forEach(profile => {
 });
 
 function selectProfile(profileId) {
-  localStorage.setItem("selectedProfileId", profileId);
-  window.location.href = "../NavBar/NavBar.html"
+  localStorage.setItem("selectedProfileId",profileId);
+  window.location.href = "../feed/feed.html"
 }
 

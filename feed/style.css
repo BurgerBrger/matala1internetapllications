@@ -1,0 +1,29 @@
+.feed {
+  padding: 20px;
+  background: #141414;
+  color: #fff;
+  min-height: 100vh; /* שהפיד ימלא את המסך */
+}
+
+.feed h2 {
+  margin-bottom: 15px;
+  color: #e50914;
+}
+
+.feed-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #222;
+  padding: 15px;
+  border-radius: 8px;
+  width: 200px;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
