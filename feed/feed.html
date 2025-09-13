@@ -22,9 +22,24 @@
     </script>
 
   <main class="feed">
-    <h2 id="welcomeMsg"></h2>  
-    <h2>Movies Catalog</h2>
-    <button id="sortBtn">Sort A–Z</button>
+    <div class="topSpacer"></div>
+    <div class="topMovie">
+      <img id="topMovieImg" src="https://m.media-amazon.com/images/M/MV5BZDA3ZDExMDUtNjdjOC00YjNhLWIyNGUtNmZhNzJkMDI1ZjUzXkEyXkFqcGc@._V1_.jpg" alt="Top Movie">
+      <div class="topMovieOverlay"></div>
+      <div class="topMovieInfo">
+        <h2 id="welcomeMsg"></h2>
+        <div id="suggestedLine"></div>
+        <h1 id="topMovieTitle" class="content topMovieTitle"></h1>
+        <div class="buttons"> 
+          <button id="watchNowBtn" class="btn primary">Watch Now</button> 
+          <button id="moreInfoBtn" class="btn secondary">More Info</button>
+        </div>
+      </div>
+    </div>
+    <div class="feed-header">
+      <div class="feed-header title">Movies Catalog</div>
+      <button id="sortBtn" class="feed-header btn">Sort A–Z</button>
+    </div>
     <div id="feedContainer" class="feed-row"></div>
 </main>
 
