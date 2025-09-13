@@ -4,25 +4,45 @@
   padding: 0;
 }
 
+:root {
+  --main-color: #db0000;
+  --dark-main-color: #831010;
+  --secondary-color: #929292;
+  --dark-tab-color: #242d33;
+  --dark-background-color: #294444;
+}
+
 body {
   background: #fff;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
 
 /* ===== NAVBAR ===== */
 .navbar-custom {
-  background: #000;
+  position: fixed;
+  z-index: 9999;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgb(0, 0, 0,0));
   height: 60px;
   width: 100%;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
 }
 
+/* ===== LEFT SECTION ===== */
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
 .logo img {
-  height: 40px;
+  height: 30px;
   width: auto;
+  margin-right: 20px;
 }
 
 /* ===== LINKS ===== */
@@ -31,13 +51,14 @@ body {
   gap: 20px;
 }
 .nav-links a {
-  color: #fff;
+  color: lightgray ;
   text-decoration: none;
-  font-weight: bold;
+  /* font-weight: bold; */
+  display: inline-block;
   transition: color 0.3s;
 }
 .nav-links a:hover {
-  color: #e50914;
+  color: white;
 }
 
 /* ===== RIGHT SECTION ===== */
@@ -50,12 +71,12 @@ body {
 /* אייקונים של Bootstrap */
 .icon {
   font-size: 22px;     /* גודל האייקון */
-  color: #fff;         /* צבע לבן */
+  color: lightgray;
   cursor: pointer;
   transition: color 0.3s;
 }
 .icon:hover {
-  color: #e50914;      /* אדום בהובר */
+  color:white;      /* אדום בהובר */
 }
 
 /* כפתור Logout */
@@ -64,11 +85,11 @@ body {
   border: none;
   cursor: pointer;
   font-size: 22px;     /* גודל אייקון */
-  color: #fff;
+  color: lightgray;
   transition: color 0.3s;
 }
 .logout-btn:hover {
-  color: #e50914;
+  color: var(--main-color);
 }
 
 .search-box {
