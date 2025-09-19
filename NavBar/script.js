@@ -1,6 +1,5 @@
 document.getElementById("logoutBtn").addEventListener("click", () => {  
   localStorage.clear();
-    window.location.href = "../singin/singin.html";
   });
 
 
@@ -12,13 +11,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     searchBtn.addEventListener("click", () => {
       const query = searchInput.value.toLowerCase();
 
-      
       localStorage.setItem("searchQuery", query);
 
-      
       window.location.href = "../feed/feed.html";
     });
   }
 });
-
-  
