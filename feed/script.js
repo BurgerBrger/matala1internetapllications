@@ -1,4 +1,4 @@
-
+//Amit-Berger-207800681-Neetai-Nezer-El-322921594
 //טוען את הסרטים מהרשימה הקבועה ואז מעדכן לפי הלייקים שרשומים אצלו במידה וכבר עשה לייקים
 
 let cards = {
@@ -9,7 +9,7 @@ let cards = {
       name: "The Godfather",
       year: 1972,
       genre: ["Drama"],
-      numberoflikes: 0,
+      numberoflikes: 29,
       image:"https://m.media-amazon.com/images/M/MV5BNGEwYjgwOGQtYjg5ZS00Njc1LTk2ZGEtM2QwZWQ2NjdhZTE5XkEyXkFqcGc@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BYjBkN2QyYzItYzZlZi00MjIyLTkwMTMtMWQ0NmQyZjAxYzdkXkEyXkFqcGc@._V1_.jpg"
     },
@@ -18,7 +18,7 @@ let cards = {
       name: "Jaws",
       year: 1975,
       genre: ["Horror"],
-      numberoflikes: 0,
+      numberoflikes: 21,
       image:"https://m.media-amazon.com/images/M/MV5BYjViNDQzNmUtYzkxZi00NTk5LTljMmItYjJlZmZkODIxNjU1XkEyXkFqcGc@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BMjI0ZmI0N2MtMTI5ZS00MmU1LThiNmQtZWQyZjljMGQ1M2VkXkEyXkFqcGc@._V1_.jpg"
     },
@@ -27,7 +27,7 @@ let cards = {
       name: "Oppenheimer",
       year: 2023,
       genre: ["Documentary"],
-      numberoflikes: 0,
+      numberoflikes: 25,
       image: "https://m.media-amazon.com/images/M/MV5BN2JkMDc5MGQtZjg3YS00NmFiLWIyZmQtZTJmNTM5MjVmYTQ4XkEyXkFqcGc@._V1_.jpg",
       wideimage: "https://m.media-amazon.com/images/M/MV5BMDEzMTNhZmEtNzAyNy00YTg3LWFhYTYtNDZiOTYwMmE4ZmFkXkEyXkFqcGc@._V1_.jpg"
     },
@@ -36,7 +36,7 @@ let cards = {
       name: "The Wolf of Wall Street",
       year: 2013,
       genre: ["Comedy"],
-      numberoflikes: 0,
+      numberoflikes: 32,
       image:"https://m.media-amazon.com/images/M/MV5BMjIxMjgxNTk0MF5BMl5BanBnXkFtZTgwNjIyOTg2MDE@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BMTg3MTY4NDk4Nl5BMl5BanBnXkFtZTgwNjc0MzQ4MDE@._V1_.jpg"
     },
@@ -45,7 +45,7 @@ let cards = {
       name: "Forrest Gump",
       year: 1994,
       genre: ["Drama"],
-      numberoflikes: 0,
+      numberoflikes: 35,
       image:"https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BZDA3ZDExMDUtNjdjOC00YjNhLWIyNGUtNmZhNzJkMDI1ZjUzXkEyXkFqcGc@._V1_.jpg"
     },
@@ -54,7 +54,7 @@ let cards = {
       name: "Monsters, Inc.",
       year: 1977,
       genre: ["Animation", "Comedy"],
-      numberoflikes: 0,
+      numberoflikes: 41,
       image:"https://m.media-amazon.com/images/M/MV5BMTY1NTI0ODUyOF5BMl5BanBnXkFtZTgwNTEyNjQ0MDE@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BZmQxMmVkMzUtMzE3My00YzQxLTk0NjUtOWZmOTZkMTA3OTVkXkEyXkFqcGc@._V1_.jpg"
     },
@@ -63,7 +63,7 @@ let cards = {
       name: "Top Gun: Maverick",
       year: 2022,
       genre: ["Action"],
-      numberoflikes: 0,
+      numberoflikes: 19,
       image:"https://m.media-amazon.com/images/M/MV5BMDBkZDNjMWEtOTdmMi00NmExLTg5MmMtNTFlYTJlNWY5YTdmXkEyXkFqcGc@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BZTdiYzk2NGItZjhjMy00MTRhLThkZTEtMGMwZjc3NmZkNDFkXkEyXkFqcGc@._V1_.jpg"
     },
@@ -72,7 +72,7 @@ let cards = {
       name: "The Maze Runner",
       year: 2014,
       genre: ["Sci Fi"],
-      numberoflikes: 0,
+      numberoflikes: 20,
       image:"https://m.media-amazon.com/images/M/MV5BMjUyNTA3MTAyM15BMl5BanBnXkFtZTgwOTEyMTkyMjE@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BMjI5MDQ0MDU2OV5BMl5BanBnXkFtZTgwOTIyODkyMjE@._V1_.jpg"
     },
@@ -81,17 +81,17 @@ let cards = {
       name: "The Blind Side",
       year: 2009,
       genre: ["Sport"],
-      numberoflikes: 0,
+      numberoflikes: 23,
       image:"https://m.media-amazon.com/images/M/MV5BMjEzOTE3ODM3OF5BMl5BanBnXkFtZTcwMzYyODI4Mg@@._V1_.jpg",
       wideimage:"https://m.media-amazon.com/images/M/MV5BMTMwNDkwMTY4N15BMl5BanBnXkFtZTcwNTkzMjg3Mg@@._V1_.jpg"
     }
   ]
 };
 
-const savedRaw = localStorage.getItem("cards");
+const profiles = JSON.parse(localStorage.getItem("profiles")); // לוקח את מערך המשתמשים שנשמר בתור סטרינג
+const saved = JSON.parse(localStorage.getItem("cards")); // לוקח את מערך הסרטים שנשמר בתור סטרינג
 
-if (savedRaw) {
-  const saved = JSON.parse(savedRaw);
+if (saved) {
   const likeMap = new Map(saved.card.map(m => [(m.id ?? m.name), Number(m.numberoflikes) || 0])); // new array of name(id) -> numberoflikes
   cards.card.forEach(m => {// update only the likes in the default cards
     const key = m.id ?? m.name;
@@ -99,46 +99,40 @@ if (savedRaw) {
   });
 }
 
-const likedSet = new Set(JSON.parse(localStorage.getItem("likedIds") || "[]"));// remember which movies like between reloads
+const likedSet = new Set(JSON.parse(localStorage.getItem("likedIds") || "[]"));
+// remember which movies like between reloads, if not found the array no movies are liked (empty array)
 
 function saveCards() {
   localStorage.setItem("likedIds", JSON.stringify([...likedSet]));
   localStorage.setItem("cards", JSON.stringify(cards)); // save the cards with new likes to localStorage
 }
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", (e) => {//פעולות בעת לחיצה על לייק
     const btn = e.target.closest(".like-btn");
-    if (!btn) return;
+    if (!btn) return; //אם אין כפתור לייק תחזור
 
-    const id = Number(btn.dataset.id);
-    const movie = cards.card.find(m => m.id === id);
+    const id = btn.dataset.id; // שומר את המזהה של הסרט שנלחץ
+    const movie = cards.card.find(m => String(m.id) === id);
     if (!movie) return;
+
+    const likeStatus = btn.classList.contains("liked"); //בדיקה האם הסרט סומן בלייק
     
-    const likeStatus = btn.classList.contains("liked");
-    btn.classList.toggle("liked", !likeStatus);
-
-    movie.numberoflikes = Math.max(0, (movie.numberoflikes || 0) + (likeStatus ? -1 : 1));
-
-    // Update UI count (sibling in overlay)
+    if (likeStatus) { // אם כבר מסומן בלייק
+      likedSet.delete(String(id)); //תמחוק מרישמת הלייקים
+      btn.classList.remove("liked", !likeStatus); // תוריד לו את הקלאס בשביל הנראות
+    }
+    else 
+      { likedSet.add(String(id)); //תוסיף לרישמת הלייקים
+        btn.classList.add("liked") // תוסיף לו את הקלאס בשביל הנראות
+      }
+    
+    // Update count
+    movie.numberoflikes = Math.max(0, (Number(movie.numberoflikes)) + (likeStatus ? -1 : 1));
     const likesEl = btn.parentElement.querySelector(".like-count");
     if (likesEl) likesEl.textContent = movie.numberoflikes;
 
-    // Update likedSet
-    if (!likeStatus) likedSet.add(String(id)); 
-    else likedSet.delete(String(id));
-
-    // Persist
     saveCards();
 });
-
-const profiles = JSON.parse(localStorage.getItem("profiles"));
-
-// const profiles = [
-//     { id: 1, name: "Yossi" },
-//     { id: 2, name: "Yuval" },
-//     { id: 3, name: "David" }
-//   ];
-
 
 function getTimeGreeting() {
   const h = new Date().getHours(); // h = current hour
@@ -152,15 +146,14 @@ function pickRandomMovie(list) {
   return list[Math.floor(Math.random() * list.length)]; // return - cards[round down(random number * number of cards)];
 }
 
-
-
 // פונקציה שמציירת את הפיד
 function renderFeed(items) {
   const feedContainer = document.getElementById("feedContainer");
   feedContainer.innerHTML = "";
 
   items.forEach((item) => {
-    const isLiked = likedSet.has(item.id); // בודק אם הסרט נמצא ברשימת הסרטים שסומנו בלייק ומשנה לו את הסטטוס במשתנה
+    const isLiked = likedSet.has(String(item.id)); 
+    // בודק אם הסרט נמצא ברשימת הסרטים שסומנו בלייק ע"י המשתמש ומשנה לו את הסטטוס במשתנה
     feedContainer.innerHTML += `
       <div class="card">
         <div class="card-media">
@@ -196,18 +189,11 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
-
 // מציירים את כל הסרטים בהתחלה
 renderFeed(cards.card);
 
-// חיפוש תוך כדי הקלדה (גם אם ה-navbar נטען אחרי)
-
 function renderTopHero() {
   const heroMovie = pickRandomMovie(cards.card);
-  // const selectedId = localStorage.getItem("selectedProfileId");
-  // const profile = selectedId
-  //   ? profiles.find(p => p.id == selectedId)
-  //   : null;
 
   // greeting + user name
   const welcomeMsg = document.getElementById("welcomeMsg");
@@ -249,7 +235,6 @@ if (sortBtn) {
   let asc = true;
   sortBtn.addEventListener("click", () => {
     cards.card.sort((a, b) => {
-      // ignore leading articles for nicer sort
       const key = s => s.toLowerCase();
       return asc
         ? key(a.name).localeCompare(key(b.name))
@@ -260,4 +245,5 @@ if (sortBtn) {
     asc = !asc;
   });
 }
+
 renderTopHero();

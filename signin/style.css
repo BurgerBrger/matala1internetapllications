@@ -1,3 +1,5 @@
+/* Amit-Berger-207800681-Neetai-Nezer-El-322921594 */
+
 * {
   margin: 0;
   padding: 0;
@@ -41,7 +43,7 @@ body {
 }
 
 form { 
-  text-align: left;   /* prevent center alignment from .card affecting fields */
+  text-align: left;
 }
 
 h1 {
@@ -196,20 +198,20 @@ input {
 .error-icon {
  display: none;
   position: absolute;
-  top: 50%;                  /* center vertically */
-  right: 10px;               /* sit inside the input box */
+  top: 50%;                 
+  right: 10px;               
   transform: translateY(-50%);
   
-  background-color: color-mix(in srgb, var(--main-color) 20%, transparent);;  /* background bubble */
-  color: var(--main-color);  /* red "!" */
+  background-color: color-mix(in srgb, var(--main-color) 20%, transparent);; 
+  color: var(--main-color);
   text-align: center;
   width: 20px;
   height: 20px;
-  line-height: 20px;         /* center "!" inside circle */
+  line-height: 20px;         
   border-radius: 50%;
 
   font-weight: bold;
-  font-size: 14px;           /* smaller so it fits nicely */
+  font-size: 14px; 
   pointer-events: none;
   z-index: 2;           
 }
