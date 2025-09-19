@@ -1,11 +1,18 @@
-document.getElementById("logoutBtn").addEventListener("click", () => {  
+//Amit-Berger-207800681-Neetai-Nezer-El-322921594
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#logoutBtn");
+  if (!btn) return;
+  e.preventDefault();
   localStorage.clear();
-  });
+  window.location.href = "../signin/signin.html";
+});
 
 
-  document.addEventListener("DOMContentLoaded", () => {
-  const searchBtn = document.getElementById("searchBtn");
-  const searchInput = document.getElementById("searchInput");
+
+document.addEventListener("DOMContentLoaded", () => {
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchInput");
 
   if (searchBtn && searchInput) {
     searchBtn.addEventListener("click", () => {

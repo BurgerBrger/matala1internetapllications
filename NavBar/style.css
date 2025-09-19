@@ -1,3 +1,5 @@
+/* Amit-Berger-207800681-Neetai-Nezer-El-322921594 */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -21,17 +23,8 @@ body {
 .navbar-custom {
   position: fixed;
   z-index: 9999;
-  
-  /* background style 1
-  background: linear-gradient(to bottom, 
-  color-mix(in srgb, black 100%, transparent) 40%,
-  color-mix(in srgb, black 70%, transparent) 66%, 
-  color-mix(in srgb, black 0%, transparent) 100%); */
-
-  /* background style 2 */
   background-color:rgba(0, 0, 0, .75);
   backdrop-filter:blur(10px);
-
   height: 60px;
   width: 100%;
   display: flex;
@@ -86,7 +79,7 @@ body {
   transition: color 0.3s;
 }
 .icon:hover {
-  color:white;      /* אדום בהובר */
+  color:white;
 }
 
 /* כפתור Logout */
