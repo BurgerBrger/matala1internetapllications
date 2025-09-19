@@ -232,7 +232,7 @@ function renderTopHero() {
   // suggested movie line under the greeting
   const suggestedLine = document.getElementById("suggestedLine");
   if (suggestedLine) {
-    suggestedLine.textContent =                           // creates the “today’s suggested movie is …” line
+    suggestedLine.textContent =  // creates the “today’s suggested movie is …” line
       "Today's suggested movie is";
   }
   const watchNowBtn = document.getElementById("watchNowBtn");
