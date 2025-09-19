@@ -32,7 +32,9 @@ profiles.forEach(profile => {
 });
 
 function selectProfile(profileId) {
-  localStorage.setItem("selectedProfileId",profileId);
+  const p = profiles.find(p => p.id === profileId);
+  localStorage.setItem("selectedProfileId",String(profileId));
+  localStorage.setItem("selectedProfileName", p ? p.name : "");
+  localStorage.setItem("profiles", JSON.stringify(profiles));
   window.location.href = "../feed/feed.html"
 }
-
