@@ -1,0 +1,90 @@
+# matala1internetapllications
+matala 1 in internet apllications
+
+basic_information
+    requirements-
+    Node.js v18+ (v22 recommended)
+        Check: node -v
+
+    npm (comes with Node)
+        Check: npm -v
+
+    installation-
+        install dependencies //terminal: npm install
+            Main packages used 
+                express
+                ejs
+                nodemon //terminal: npm install --save-dev nodemon
+        run the app
+            reg version:
+                terminal: npm start
+            dev version:
+                terminal: npm dev
+            the scripts are in package.json
+    
+project structure:
+├─ controllers/
+│  ├─ feed.js           # controller for server-rendered feed (if used)
+│  ├─ movies.js         # API handlers (getAllMovies, getMovieById, getRandomMovie)
+│  ├─ profilepage.js
+│  └─ signin.js
+│
+├─ models/
+│  └─ movies.js         # in-memory “DB” (array of movie objects)
+│
+├─ public/              # static assets served at /
+│  ├─ css/
+│  │  ├─ feed.css
+│  │  ├─ navbar.css
+│  │  ├─ profilepage.css
+│  │  └─ signin.css
+│  ├─ images/
+│  │  ├─ card/          # poster images for grid
+│  │  └─ wide/          # wide images for hero
+│  └─ js/
+│     ├─ feed.js        # client code (fetch API, render hero + grid, search/sort/like)
+│     ├─ navbar.js
+│     ├─ profilepage.js
+│     └─ signin.js
+│
+├─ routes/
+│  ├─ api/
+│  │  └─ movies.js      # /api/movies, /api/movies/random, /api/movies/:id
+│  └─ pages/
+│     ├─ feed.js        # GET /feed
+│     ├─ profilepage.js # GET /profile
+│     └─ signin.js      # GET /
+│
+├─ views/               # EJS templates
+│  ├─ partial/
+│  │  └─ navbar.ejs
+│  ├─ feed.ejs
+│  ├─ profilepage.ejs
+│  └─ signin.ejs
+│
+├─ index.js             # app entry: Express + EJS + static + routes
+└─ package.json
+
+project/
+├─ controllers/         # לוגיקה של הדפים וה-API
+├─ models/              # "מסד נתונים" בזיכרון (מערך סרטים)
+├─ public/              # קבצים סטטיים נגישים מהשורש /
+│  ├─ css/              # קבצי עיצוב
+│  ├─ images/           # תמונות (card / wide)
+│  └─ js/               # קוד לקוח (feed.js וכו')
+├─ routes/
+│  ├─ api/              # ראוטים של ה-API (/api/movies)
+│  └─ pages/            # ראוטים של עמודים (/feed /profile /)
+├─ views/               # תבניות EJS
+└─ index.js             # קובץ כניסה לשרת
+
+        
+        
+    
+    
+
+        
+
+    
+
+
