@@ -31,7 +31,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
 /* top hero */
 
-.topMovie{
+.topContent{
   padding-top: 60px;
   height: 400px;
   position: relative;
@@ -39,7 +39,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   /* height: 70vh; */
 }
 
-.topMovie img{
+.topContent .bgImg{
   position: absolute;
   right: 0px;
   top: 0px; 
@@ -51,7 +51,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   
 }
 
-.topMovie .topMovieOverlay{
+.topContent .topContentOverlay{
   position: absolute;
   top: 0;
   left: 0;
@@ -64,7 +64,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   z-index: 2;
 }
 
-.topMovie .topMovieInfo {
+.topContent .topContentInfo {
   position: relative;
   z-index: 3;
   color: white;
@@ -84,24 +84,24 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   color: #ddd;
 }
 
-.topMovie .content .h1 .topMovieTitle {
+.topContent .content .h1 .topContentTitle {
   font-size: 48px;
   margin-bottom: 10px;
 }
 
-.topMovie .buttons {
+.topContent .buttons {
   display: flex;
   gap: 10px;
 }
 
-.topMovie .btn {
+.topContent .btn {
   padding: 10px 20px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
 }
 
-.topMovie .btn.primary {
+.topContent .btn.primary {
   background-color: var(--main-color);
   color: white;
 }
@@ -110,7 +110,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   background-color: color-mix(in srgb, var(--main-color) 70%, transparent);
 }
 
-.topMovie .btn.secondary {
+.topContent .btn.secondary {
   background-color: var(--dark-tab-color);
   color: white;
 }
@@ -306,9 +306,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   animation: ring .5s ease-out;
 }
 
-/* movie year */
+/* content year */
 
-.card .movie-year{
+.card .content-year{
   background-color: rgba(255,255,255,0.3);
   color: rgb(255, 255, 255);
   font-size: 12px;
@@ -318,28 +318,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
 }
 
-/* Movie title/metadata */
+/* Content title/metadata */
 
-.card .movie-title {
-  font-size: 16px;
+.card .content-title {
+  font-size: 18px;
   margin-bottom: 0px;
 }
 
-.card .movie-genres {
+.card .content-genres {
   font-size: 12px;
   color: lightgray;
 }
-
-/*if we want a cool design for the genres this one can be nice, but needs more work in js */
-/* .card .movie-genres { 
-  font-size: 12px;
-  color: lightgray;
-  max-width:fit-content;
-  background-color: var(--dark-tab-color);
-  border-radius: 9999px;
-  padding: 1px 10px;
-  text-align: center;
-} */
 
 /* Keyframes */
 @keyframes heart-pop {

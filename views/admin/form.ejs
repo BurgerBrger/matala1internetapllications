@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title><%= item ? "Edit" : "New" %> Content</title>
+  <link rel="stylesheet" href="/css/feed.css"/>
+  <style>
+    
+  </style>
+</head>
+<body>
+
+  <%- include('../partial/adminNavbar.ejs') %>
+
+  <main class="admin-content">
+    <div class="topSpacer"></div>
+
+    <h1><%= item ? "Edit" : "New" %> Content</h1>
+
+    <form method="POST"
+          action="<%= item ? ("/admin/content/" + item.id + "?_method=PUT") : "/admin/content" %>"
+          enctype="multipart/form-data">
+
+      <div class="row">
+        <label>
+          Name
+          <input type="text" name="name" value="<%= item?.name || "" %>" required>
+        </label>
+
+        <label>
+          Type
+          <select name="type">
+            <option value="movie" <%= item?.type === "movie" ? "selected" : "" %>>Movie</option>
+            <option value="tv" <%= item?.type === "tv" ? "selected" : "" %>>TV</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>
+          Year
+          <input type="number" name="year" value="<%= item?.year || "" %>">
+        </label>
+        <label>
+          Likes
+          <input type="number" name="numberOfLikes" value="<%= item?.numberOfLikes ?? item?.numberoflikes ?? 0 %>">
+        </label>
+      </div>
+
+      <label>
+        Genres (comma separated)
+        <input type="text" name="genres" value="<%= (item?.genre || []).join(", ") %>">
+      </label>
+
+      <div class="preview">
+        <% if (item?.image) { %><img class="preview-img" src="<%= item.image %>"><% } %>
+        <label>Poster image (JPG/PNG)
+          <input type="file" name="poster" accept="image/*">
+        </label>
+      </div>
+
+      <div class="preview">
+        <% if (item?.wideimage) { %><img class="preview-img" src="<%= item.wideimage %>"><% } %>
+        <label>Wide image for hero (JPG/PNG)
+          <input type="file" name="wideimage" accept="image/*">
+        </label>
+      </div>
+
+      <div class="preview">
+        <% if (item?.trailer) { %>
+          <video width="320" controls src="<%= item.trailer %>"></video>
+        <% } %>
+        <label>Trailer (MP4)
+          <input type="file" name="trailer" accept="video/mp4">
+        </label>
+      </div>
+
+      <div class="btns">
+        <button class="btn" type="submit"><%= item ? "Save" : "Create" %></button>
+        <a class="btn" href="/admin/content">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+<link rel="stylesheet" href="/css/admin.css">
+<link rel="stylesheet" href="/css/adminNavbar.css">
+
+<script src="/js/adminNavbar.js" defer></script>
+
+
+</body>
+</html>

@@ -5,7 +5,7 @@ document.addEventListener("click", (e) => {
   if (!btn) return;
   e.preventDefault();
   localStorage.clear();
-  window.location.href = "../signin/signin.html";
+  window.location.href = "/";
 });
 
 

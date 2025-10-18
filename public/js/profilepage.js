@@ -1,41 +1,201 @@
 //Amit-Berger-207800681-Neetai-Nezer-El-322921594
-const profiles = [
-  {
-    id: 1,
-    name: "Yosi",
-    image: "https://images.unsplash.com/photo-1638643391904-9b551ba91eaa?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    //image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    id: 2,
-    name: "Yuval",
-    image: "https://images.unsplash.com/photo-1639628735078-ed2f038a193e?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    //image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop"
-  },
-  {
-    id:3,
-    name: "David",
-    image: "https://images.unsplash.com/photo-1638803040283-7a5ffd48dad5?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    //image: "https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?q=80&w=800&auto=format&fit=crop"
-  }
-];
 
-const profilesContainer = document.getElementById("profiles");
+// public/js/profilepage.js
 
-profiles.forEach(profile => {
-  profilesContainer.innerHTML +=
-    "<div class='col-6 col-md-4 col-lg-3'>" +
-      "<div class='card p-2' onclick='selectProfile(" + profile.id + ")'>" +
-        "<img src='" + profile.image + "' class='card-img-top' alt='" + profile.name + "'>" +
-        "<p class='name mt-2'>" + profile.name + "</p>" +
-      "</div>" +
-    "</div>";
-});
+// Edit mode
 
-function selectProfile(profileId) {
-  const p = profiles.find(p => p.id === profileId);
-  localStorage.setItem("selectedProfileId",String(profileId));
-  localStorage.setItem("selectedProfileName", p ? p.name : "");
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  window.location.href = "/feed"
+// public/js/profilepage.js
+
+let EDIT_MODE = false;
+let PROFILES = [];
+let AVATARS = []; // cache
+
+async function fetchJSON(url, opts) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(`${opts?.method || "GET"} ${url} -> ${res.status}`);
+  return res.json();
 }
+
+async function loadProfiles() {
+  PROFILES = await fetchJSON("/api/profiles");
+}
+async function loadAvatars() {
+  if (AVATARS.length) return AVATARS;
+  AVATARS = await fetchJSON("/api/profiles/avatars");
+  return AVATARS;
+}
+
+/* ---------- RENDER ---------- */
+function profileCard(p) {
+  const img = p.image || "/images/profile/default.avif";
+  if (!EDIT_MODE) {
+    return `
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card p-2" data-id="${p.id}">
+          <img src="${img}" class="card-img-top" alt="${p.name}">
+          <p class="name mt-2">${p.name}</p>
+        </div>
+      </div>`;
+  }
+
+  // EDIT MODE: non-clickable card + overlay icons + inline name input
+  return `
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card p-2 edit" data-id="${p.id}">
+        <div class="img-wrap" style="position:relative">
+          <img src="${img}" class="card-img-top" alt="${p.name}">
+          <div class="hover-overlay">
+            <i class="bi bi-pencil icon-btn edit" title="Change picture"></i>
+            <i class="bi bi-trash icon-btn trash" title="Delete profile"></i>
+          </div>
+        </div>
+        <input class="name-input mt-2" value="${p.name}" />
+      </div>
+    </div>`;
+}
+
+function addProfileCard() {
+  return `
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="add-card" id="addProfileCard">+ Add Profile</div>
+    </div>`;
+}
+
+function render() {
+  const root = document.getElementById("profiles");
+  root.innerHTML = [
+    ...PROFILES.map(profileCard),
+    ...(EDIT_MODE ? [addProfileCard()] : []),
+  ].join("");
+}
+
+/* ---------- NORMAL (view) MODE HANDLERS ---------- */
+function attachViewHandlers() {
+  const root = document.getElementById("profiles");
+  root.addEventListener("click", (e) => {
+    if (EDIT_MODE) { e.preventDefault(); return; }  // defensive
+    const card = e.target.closest(".card");
+    if (!card) return;
+    const id = card.dataset.id;
+    const p = PROFILES.find(x => String(x.id) === String(id));
+    localStorage.setItem("selectedProfileId", String(id));
+    localStorage.setItem("selectedProfileName", p ? p.name : "");
+    localStorage.setItem("profiles", JSON.stringify(PROFILES));
+    window.location.href = "/feed";
+  });
+}
+
+/* ---------- EDIT MODE HANDLERS ---------- */
+function attachEditHandlers() {
+  const root = document.getElementById("profiles");
+
+  // Add profile → server sets default image `/images/profile/default.avif`
+  root.addEventListener("click", async (e) => {
+    const add = e.target.closest("#addProfileCard");
+    if (!add) return;
+    const created = await fetchJSON("/api/profiles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "New Profile" })
+    });
+    PROFILES.push(created);
+    render();
+  });
+
+  // Save name on Enter or blur
+  root.addEventListener("keydown", async (e) => {
+    const input = e.target.closest(".name-input");
+    if (!input || e.key !== "Enter") return;
+    e.preventDefault();
+    await saveName(input);
+  });
+  root.addEventListener("blur", async (e) => {
+    const input = e.target.closest(".name-input");
+    if (!input) return;
+    await saveName(input);
+  }, true);
+
+  async function saveName(input) {
+    const card = input.closest(".card");
+    const id = card.dataset.id;
+    const name = input.value.trim();
+    const updated = await fetchJSON(`/api/profiles/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+    const ix = PROFILES.findIndex(p => String(p.id) === String(id));
+    PROFILES[ix] = updated;
+    render();
+  }
+
+  // Change picture (pencil)
+  root.addEventListener("click", async (e) => {
+    const icon = e.target.closest(".icon-btn.edit");
+    if (!icon) return;
+    const card = icon.closest(".card");
+    const id = card.dataset.id;
+
+    // open modal & load avatars
+    const modal = document.getElementById("avatarModal");
+    const grid  = document.getElementById("avatarGrid");
+    const close = document.getElementById("avatarClose");
+    const avatars = await loadAvatars();
+    grid.innerHTML = avatars.map(src => `<img data-src="${src}" src="${src}" alt="">`).join("");
+    modal.style.display = "flex";
+
+    const onPick = async (ev) => {
+      const img = ev.target.closest("img");
+      if (!img) return;
+      const path = img.dataset.src; // library path
+      const updated = await fetchJSON(`/api/profiles/${id}`, {
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ image: path })
+      });
+      const ix = PROFILES.findIndex(p => String(p.id) === String(id));
+      PROFILES[ix] = updated;
+      modal.style.display = "none";
+      grid.removeEventListener("click", onPick);
+      render();
+    };
+
+    grid.addEventListener("click", onPick);
+    close.onclick = () => { modal.style.display = "none"; grid.removeEventListener("click", onPick); };
+  });
+
+  // Delete (trash) with confirm
+  root.addEventListener("click", async (e) => {
+    const icon = e.target.closest(".icon-btn.trash");
+    if (!icon) return;
+    const card = icon.closest(".card");
+    const id = card.dataset.id;
+    if (!confirm("Delete this profile? This cannot be undone.")) return;
+    await fetchJSON(`/api/profiles/${id}`, { method: "DELETE" });
+    PROFILES = PROFILES.filter(p => String(p.id) !== String(id));
+    render();
+  });
+}
+
+/* ---------- MANAGE TOGGLE ---------- */
+function attachManageToggle() {
+  const btn = document.getElementById("manageBtn");
+  btn.addEventListener("click", () => {
+    EDIT_MODE = !EDIT_MODE;
+    btn.textContent = EDIT_MODE ? "Done" : "Manage profiles";
+    render();
+  });
+}
+
+/* ---------- INIT ---------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await loadProfiles();
+    render();
+    attachViewHandlers();
+    attachEditHandlers();
+    attachManageToggle();
+  } catch (e) {
+    console.error(e);
+  }
+});

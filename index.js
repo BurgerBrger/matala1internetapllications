@@ -5,8 +5,9 @@ const path = require("path");
 const signinViewRouter = require("./routes/pages/signin");
 const profilepageViewRouter = require("./routes/pages/profilepage");
 const feedViewRouter = require("./routes/pages/feed");
+const adminViewRouter = require("./routes/pages/adminContent");
 
-const apiMoviesRouter = require("./routes/api/movies");
+const apiContentsRouter = require("./routes/api/content");
 
 const app = express();
 
@@ -21,15 +22,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", require("./routes/pages/signin"));
 app.use("/profile", require("./routes/pages/profilepage"));
 app.use("/feed", require("./routes/pages/feed"));
-app.use("/api/movies", require("./routes/api/movies"));
+app.use("/admin/content", require("./routes/pages/adminContent"));
+app.use("/player", require("./routes/pages/player"));
 
-app.use("/api/movies", require("./routes/api/movies"));
-
-app.use(express.json());                 // JSON bodies
-app.use(express.urlencoded({ extended: false })); // form posts
+app.use("/api/profiles", require("./routes/api/profiles"));
+app.use("/api/content", require("./routes/api/content"));
 
 app.listen(5050, () => console.log("server is running"));
-
-
-// index.js  (replace the middle of the file with this)
 
