@@ -1,0 +1,157 @@
+/* Amit-Berger-207800681-Neetai-Nezer-El-322921594 */
+
+body {
+  background-color: #141414;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title {
+  color: white;
+  margin-top: 20px;
+}
+
+.card {
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  color: grey;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  border-radius: 8px;
+  color: white;
+  img{
+    border: 4px solid white;
+  }
+}
+
+.card img {
+  border-radius: 8px;
+  transition: border 0.3s ease, border-radius 0.3s ease;
+}
+
+.name {
+  margin: 10px;
+  font-weight: bold;
+}
+
+.topimg{
+  max-width: 250px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.helpbutton {
+  border-radius: 8px;
+  margin-top: 10px;
+  background-color: transparent;
+  border: 2px solid grey;
+  color: grey;
+  font-size: 24px;
+  cursor: pointer;
+  width: max-content;
+  padding: 6px 24px;
+}
+
+.helpbutton:hover {
+  border-radius: 8px;
+  border: 2px solid white;
+  color: white;
+}
+
+/* edit-state styles */
+.card.edit .actions { 
+  display:flex; 
+  gap:8px; 
+  justify-content:center; 
+  margin-top:6px; 
+}
+
+.card.edit .name {
+   color:#fff; 
+  }
+
+.add-card {
+  border-radius: 8px;
+   border:2px dashed #555;
+   color:#aaa; padding:24px;
+   cursor:pointer; 
+    }
+
+.add-card:hover {
+   border-color:#fff;
+   color:#fff; 
+    }
+
+/* super simple modal */
+.modal {
+   position:fixed;
+   inset:0;
+   background:rgba(0,0,0,.7);
+   display:flex; 
+   align-items:center; 
+   justify-content:center; 
+  }
+
+.modal-inner {
+  background:#111;
+  padding:16px;
+  border:1px solid #333;
+  border-radius:8px;
+  max-width:700px;
+  width:90%; 
+}
+
+.avatar-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px,1fr)); gap:12px; margin:12px 0; }
+.avatar-grid img { width:100%; height:96px; object-fit:cover; cursor:pointer; border-radius:8px; border:2px solid transparent; }
+.avatar-grid img:hover { border-color:#fff; }
+
+/* --- Manage mode / edit-only visuals --- */
+.card.edit { position: relative; cursor: default; }
+.card.edit .card-img-top { border-radius: 8px; }
+
+/* dark veil overlay with icons, appears on hover */
+.card.edit .hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: opacity .2s ease;
+  border-radius: 8px;
+}
+.card.edit:hover .hover-overlay { opacity: 1; }
+
+/* icon buttons */
+.icon-btn { font-size: 28px; color: #fff; cursor: pointer; }
+.icon-btn.edit:hover { filter: drop-shadow(0 0 2px #fff); }
+.icon-btn.trash:hover { color: #ff4d4d; }
+
+/* name editing: gray text + white underline on focus */
+.name-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #444;
+  color: #9a9a9a;
+  outline: none;
+  text-align: center;
+  width: 100%;
+}
+.name-input:focus {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+/* Disable all clicks on the card in edit mode */
+.card.edit { pointer-events: none; }
+/* Re-enable clicks only for the overlay controls and the name input */
+.card.edit .hover-overlay,
+.card.edit .hover-overlay * ,
+.card.edit .name-input { pointer-events: auto; }
+

@@ -1,0 +1,48 @@
+/* Amit-Berger-207800681-Neetai-Nezer-El-322921594 */
+
+:root {
+  --main-color: #db0000;
+  --dark-main-color: #831010;
+  --secondary-color: #929292;
+  --dark-tab-color: #242d33;
+  --dark-background-color: #294444;
+  --dark-feed-color: #141414;
+
+  --like-hover: rgba(255, 255, 255, 0.22);
+
+  --thumb-h: 280px;
+}
+
+.topSpacer{
+  min-height: 60px; /* Adjust this value to match the navbar height */
+}
+
+/* Hide scrollbars */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-content {
+  background-color: var(--dark-feed-color);
+  color: #fff;
+  min-height: 100vh; /* שהפיד ימלא את המסך */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.topSpacer{
+  min-height: 80px; /* Adjust this value to match the navbar height */
+}
+
+.admin-content .admin-header {
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px auto;
+  max-width: 90%;
+}
+
+.admin-content .content-table {
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px auto;
+  max-width: 90%;
+}

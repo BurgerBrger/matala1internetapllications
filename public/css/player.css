@@ -1,0 +1,73 @@
+:root {
+  --main-color: #db0000;
+  --dark-main-color: #831010;
+  --secondary-color: #929292;
+  --dark-tab-color: #242d33;
+  --dark-background-color: #294444;
+  --dark-feed-color: #141414;
+
+  --like-hover: rgba(255, 255, 255, 0.22);
+
+  --thumb-h: 280px;
+}
+
+.topSpacer{
+  min-height: 60px; /* Adjust this value to match the navbar height */
+}
+
+.player {
+  background: var(--dark-feed-color);
+  color: #fff;
+  min-height: 100vh; /* שהפיד ימלא את המסך */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+/* --- Player hero overrides (do not affect feed) --- */
+.player .topContent { position: relative; height: 400px; }
+
+/* ensure the gradient overlay sits above the image but below the text */
+.player .topContentOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.player .topContentInfo {
+  position: absolute;      /* fill the hero vertically */
+  left: 0; top: 0; bottom: 0;
+  z-index: 2;
+  display: flex;            /* center the row vertically */
+  align-items: center;
+  max-width: min(60%, 900px);
+  padding-left: clamp(16px, 3vw, 48px);
+  padding-right: clamp(12px, 2vw, 32px);
+}
+
+/* row: poster + text side-by-side */
+.player .player-hero-row {
+  position: relative;
+  display: flex;
+  align-items: center; 
+  gap: 24px;
+}
+
+/* poster keeps its size; text takes the rest */
+.player .poster-in-hero { 
+  position: relative;      /* fill the hero vertically */
+  left: 0; top: 0; bottom: 0;
+  z-index: 2;
+  align-items: center;
+  height: 350px;
+  border-radius: 18px;
+}
+
+.player .player-hero-info { 
+  position: relative;
+  flex: 1 1 auto; 
+  min-width: 0; }
+
+@media (max-width: 576px) {
+  .player .player-hero-row { flex-wrap: wrap; }
+  .player .poster-in-hero { width: 130px; }
+}
