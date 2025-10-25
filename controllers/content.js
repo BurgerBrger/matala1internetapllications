@@ -1,67 +1,73 @@
 // controllers/content.js
-const { content, saveAll: saveContent } = require("../models/contentStore");
-const { profiles, saveAll: saveProfiles } = require("../models/profilesStore");
+const Content = require("../models/mongo/Content");
+const Profile = require("../models/mongo/Profile");
 
-// ---- helpers ----
-function ensureLikedArray(p) { if (!Array.isArray(p.liked)) p.liked = []; return p.liked; }
-function findContent(id)     { return content.find(c => Number(c.id) === Number(id)); }
-function findProfile(id)     { return profiles.find(p => Number(p.id) === Number(id)); }
-function likesField(item)    { return "numberOfLikes" in item ? "numberOfLikes" : "numberoflikes"; }
+// GET /api/content
+exports.getAllContents = async (req, res, next) => {
+  try {
+    const list = await Content.find({}).sort({ id: 1 }).lean();
+    res.json(list);
+  } catch (e) { next(e); }
+};
 
-// ---- read endpoints ----
-function getAllContents(req, res)      { res.json(content); }
-function getContentById(req, res)      {
-  const item = findContent(req.params.id);
-  if (!item) return res.status(404).json({ error: "Not found" });
-  res.json(item);
-}
-function getRandomContent(req, res)    {
-  if (!content.length) return res.status(404).json({ error: "No content" });
-  const item = content[Math.floor(Math.random() * content.length)];
-  res.json(item);
-}
+// GET /api/content/random
+exports.getRandomContent = async (_req, res, next) => {
+  try {
+    // try true random first
+    const [doc] = await Content.aggregate([{ $sample: { size: 1 } }]);
+    if (doc) return res.json(doc);
 
-// ---- like / unlike ----
-function likeContent(req, res) {
-  const contentId = Number(req.params.id);
-  const { profileId } = req.body || {};
-  const item = findContent(contentId);
-  const prof = findProfile(profileId);
-  if (!item || !prof) return res.status(404).json({ error: "Not found" });
+    // fallback if sample finds none (e.g. empty collection or wrong name)
+    const first = await Content.findOne({}).sort({ id: 1 }).lean();
+    if (first) return res.json(first);
 
-  const liked = ensureLikedArray(prof);
-  if (!liked.includes(contentId)) liked.push(contentId);
+    // truly empty DB
+    return res.status(404).json({ error: "No content" });
+  } catch (e) { next(e); }
+};
 
-  const field = likesField(item);
-  item[field] = Math.max(0, Number(item[field] || 0) + 1);
 
-  saveProfiles(); saveContent();
-  res.json({ id: contentId, numberOfLikes: item[field], liked: true });
-}
+// GET /api/content/:id
+exports.getContentById = async (req, res, next) => {
+  try {
+    const item = await Content.findOne({ id: Number(req.params.id) }).lean();
+    if (!item) return res.status(404).json({ error: "Not found" });
+    res.json(item);
+  } catch (e) { next(e); }
+};
 
-function unlikeContent(req, res) {
-  const contentId = Number(req.params.id);
-  const { profileId } = req.body || {};
-  const item = findContent(contentId);
-  const prof = findProfile(profileId);
-  if (!item || !prof) return res.status(404).json({ error: "Not found" });
+// POST /api/content/:id/like
+exports.likeContent = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const profileId = Number(req.body.profileId || req.query.profileId || 0);
 
-  const field = likesField(item);
-  item[field] = Math.max(0, Number(item[field] || 0) - 1);
+    const content = await Content.findOneAndUpdate(
+      { id }, { $inc: { numberOfLikes: 1 } }, { new: true }
+    ).lean();
+    if (!content) return res.status(404).json({ error: "Not found" });
 
-  const liked = ensureLikedArray(prof);
-  const i = liked.indexOf(contentId);
-  if (i !== -1) liked.splice(i, 1);
+    if (profileId) {
+      await Profile.updateOne({ id: profileId }, { $addToSet: { liked: id } });
+    }
+    res.json({ ok: true, content });
+  } catch (e) { next(e); }
+};
 
-  saveProfiles(); saveContent();
-  res.json({ id: contentId, numberOfLikes: item[field], liked: false });
-}
+// POST /api/content/:id/unlike
+exports.unlikeContent = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const profileId = Number(req.body.profileId || req.query.profileId || 0);
 
-// export everything we use
-module.exports = {
-  getAllContents,
-  getContentById,
-  getRandomContent,
-  likeContent,
-  unlikeContent,
+    const content = await Content.findOneAndUpdate(
+      { id, numberOfLikes: { $gt: 0 } }, { $inc: { numberOfLikes: -1 } }, { new: true }
+    ).lean();
+    if (!content) return res.status(404).json({ error: "Not found" });
+
+    if (profileId) {
+      await Profile.updateOne({ id: profileId }, { $pull: { liked: id } });
+    }
+    res.json({ ok: true, content });
+  } catch (e) { next(e); }
 };

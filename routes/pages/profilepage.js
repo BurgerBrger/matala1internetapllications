@@ -1,7 +1,5 @@
-const express = require("express");
-const router = express.Router();
-const { render } = require("../../controllers/profilepage");
-
-router.get("/", render);
-
+// routes/pages/profilepage.js
+const router = require("express").Router();
+const c = require("../../controllers/profilepage");
+router.get("/", c.render);   // GET /profile -> page
 module.exports = router;

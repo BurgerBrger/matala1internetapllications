@@ -1,20 +1,11 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
+const c = require("../../controllers/content");
 
-const {
-  getAllContents,
-  getContentById,
-  getRandomContent,
-  likeContent,
-  unlikeContent,
-} = require("../../controllers/content");
+router.get("/",       c.getAllContents);
+router.get("/random", c.getRandomContent); // must be above :id
+router.get("/:id",    c.getContentById);
 
-router.get("/", getAllContents);
-router.get("/random", getRandomContent);
-router.get("/:id", getContentById);
-
-// like/unlike
-router.post("/:id/like", likeContent);
-router.post("/:id/unlike", unlikeContent);
+router.post("/:id/like",   c.likeContent);
+router.post("/:id/unlike", c.unlikeContent);
 
 module.exports = router;

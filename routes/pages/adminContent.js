@@ -1,26 +1,14 @@
-// routes/pages/adminContent.js
-const express = require("express");
-const router = express.Router();
-const methodOverride = require("method-override");
-const {
-  uploadFields,
-  listPage,
-  newPage,
-  editPage,
-  createItem,
-  updateItem,
-  deleteItem,
-} = require("../../controllers/adminContent");
+const router = require("express").Router();
+const admin = require("../../controllers/adminContent");
 
-// Allow ?_method=PUT / ?_method=DELETE from HTML forms
-router.use(methodOverride("_method"));
+// list & form pages
+router.get("/", admin.listPage);
+router.get("/new", admin.newPage);
+router.get("/:id/edit", admin.editPage);
 
-router.get("/", listPage);
-router.get("/new", newPage);
-router.get("/:id/edit", editPage);
-
-router.post("/", uploadFields, createItem);
-router.put("/:id", uploadFields, updateItem);
-router.delete("/:id", deleteItem);
+// create / update / delete (with uploads where relevant)
+router.post("/", admin.uploadFields, admin.createItem);
+router.post("/:id", admin.uploadFields, admin.updateItem);
+router.post("/:id/delete", admin.deleteItem);
 
 module.exports = router;

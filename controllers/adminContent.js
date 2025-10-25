@@ -1,149 +1,136 @@
-// controllers/adminContent.js
+// controllers/adminContent.js  (Mongo version)
 const path = require("path");
 const { v4: uuid } = require("uuid");
 const multer = require("multer");
-const { content, saveAll, nextId } = require("../models/contentStore");
-// ...push/remove/edit items in `content`...
-// call saveAll() after changes
+const Content = require("../models/mongo/Content");
 
-
-// ----- Multer storage & filter -----
+// ---------- uploads (poster/wide image/video) ----------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const isImage = file.mimetype.startsWith("image/");   // <-- was "images/"
+    const isImage = file.mimetype.startsWith("image/");
     const isVideo = file.mimetype === "video/mp4";
-
     if (isImage) {
-      // pick subfolder by field name
       const sub = file.fieldname === "wideimage" ? "wide" : "card";
       cb(null, path.join(__dirname, "..", "public", "images", sub));
     } else if (isVideo) {
       cb(null, path.join(__dirname, "..", "public", "videos"));
     } else {
-      cb(new Error("Only images or MP4 videos are allowed"), null);
+      cb(new Error("Only images or MP4 videos are allowed"));
     }
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || "";
-    cb(null, uuid() + ext.toLowerCase());
-  },
+    cb(null, `${uuid()}${path.extname(file.originalname).toLowerCase()}`);
+  }
 });
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-
-function fileFilter(req, file, cb) {
-  const ok = file.mimetype.startsWith("image/") || file.mimetype === "video/mp4";
-  cb(ok ? null : new Error("Only images or MP4 videos are allowed"), ok);
-}
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max per file; adjust as needed
-  },
-});
-
-// Expose middleware to routes
+// expose one middleware that matches your form field names
 const uploadFields = upload.fields([
-  { name: "poster", maxCount: 1 },     // single poster image
-  { name: "wideimage", maxCount: 1 },  // single wide image for hero
-  { name: "trailer", maxCount: 1 },    // optional MP4
+  { name: "poster",    maxCount: 1 }, // goes to /public/images/card
+  { name: "wideimage", maxCount: 1 }, // goes to /public/images/wide
+  { name: "trailer",   maxCount: 1 }  // goes to /public/videos
 ]);
 
-// ----- Pages -----
-function listPage(req, res) {
-  res.render("admin/list", { items: content });
+// ---------- helpers ----------
+async function nextId() {
+  const last = await Content.findOne().sort({ id: -1 }).lean();
+  return last ? last.id + 1 : 1;
+}
+function splitGenres(str = "") {
+  return String(str)
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
 }
 
-function newPage(req, res) {
+// ---------- page renderers ----------
+async function listPage(_req, res, next) {
+  try {
+    const items = await Content.find({}).sort({ id: 1 }).lean();
+    res.render("admin/list", { items });
+  } catch (e) { next(e); }
+}
+function newPage(_req, res) {
   res.render("admin/form", { item: null });
 }
-
-function editPage(req, res) {
-  const id = Number(req.params.id);
-  const item = content.find(c => Number(c.id) === id);
-  if (!item) return res.status(404).send("Not found");
-  res.render("admin/form", { item });
+async function editPage(req, res, next) {
+  try {
+    const item = await Content.findOne({ id: Number(req.params.id) }).lean();
+    if (!item) return res.status(404).send("Not found");
+    res.render("admin/form", { item });
+  } catch (e) { next(e); }
 }
 
-// ----- Actions -----
-function createItem(req, res) {
-  const { name, year, type, genres, numberOfLikes } = req.body;
-  const id = nextId();
+// ---------- actions ----------
+async function createItem(req, res, next) {
+  try {
+    const id = await nextId();
+    const { name, year, type, genres, numberOfLikes } = req.body;
 
-  // Build images/videos URLs if files uploaded
-  const poster = req.files?.poster?.[0];
-  const wide = req.files?.wideimage?.[0];
-  const trailer = req.files?.trailer?.[0];
+    const poster  = req.files?.poster?.[0];
+    const wide    = req.files?.wideimage?.[0];
+    const trailer = req.files?.trailer?.[0];
 
-  const newItem = {
-    id,
-    name: (name || "").trim(),
-    year: Number(year) || null,
-    type: (type || "movie").toLowerCase(), // movie | tv
-    genre: (genres || "")
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean),
-    numberOfLikes: Number(numberOfLikes || 0),
-    image: poster ? `/images/card/${poster.filename}` : "",
-    wideimage: wide ? `/images/wide/${wide.filename}` : "",
-    trailer: trailer ? `/videos/${trailer.filename}` : "",
-  };
+    await Content.create({
+      id,
+      name: (name || "").trim(),
+      year: year ? Number(year) : null,
+      type: (type || "movie").toLowerCase(),
+      genre: splitGenres(genres),
+      numberOfLikes: Number(numberOfLikes || 0),
+      image:     poster  ? `/images/card/${poster.filename}` : "",
+      wideimage: wide    ? `/images/wide/${wide.filename}` : "",
+      video:     trailer ? `/videos/${trailer.filename}`   : ""
+    });
 
-  content.push(newItem);
-  saveAll();
-
-  res.redirect("/admin/content");
+    res.redirect("/admin/content");
+  } catch (e) { next(e); }
 }
 
-function updateItem(req, res) {
-  const id = Number(req.params.id);
-  const idx = content.findIndex(c => Number(c.id) === id);
-  if (idx === -1) return res.status(404).send("Not found");
+async function updateItem(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const { name, year, type, genres, numberOfLikes } = req.body;
 
-  const item = content[idx];
-  const { name, year, type, genres, numberOfLikes } = req.body;
+    const patch = {};
+    if (name !== undefined)          patch.name = String(name).trim();
+    if (year !== undefined)          patch.year = year ? Number(year) : null;
+    if (type !== undefined)          patch.type = String(type).toLowerCase();
+    if (genres !== undefined)        patch.genre = splitGenres(genres);
+    if (numberOfLikes !== undefined) patch.numberOfLikes = Number(numberOfLikes);
 
-  // Keep existing values if not provided
-  item.name = name?.trim() || item.name;
-  item.year = year ? Number(year) : item.year;
-  item.type = type ? type.toLowerCase() : item.type;
-  item.genre = genres
-    ? genres.split(",").map(s => s.trim()).filter(Boolean)
-    : item.genre;
-  item.numberOfLikes = numberOfLikes ? Number(numberOfLikes) : item.numberOfLikes;
+    const poster  = req.files?.poster?.[0];
+    const wide    = req.files?.wideimage?.[0];
+    const trailer = req.files?.trailer?.[0];
+    if (poster)  patch.image     = `/images/card/${poster.filename}`;
+    if (wide)    patch.wideimage = `/images/wide/${wide.filename}`;
+    if (trailer) patch.video     = `/videos/${trailer.filename}`;
 
-  // Replacements if new files uploaded
-  const poster = req.files?.poster?.[0];
-  const wide = req.files?.wideimage?.[0];
-  const trailer = req.files?.trailer?.[0];
+    const updated = await Content.findOneAndUpdate({ id }, patch, { new: true });
+    if (!updated) return res.status(404).send("Not found");
 
-  if (poster) item.image = `/images/card/${poster.filename}`;
-  if (wide) item.wideimage = `/images/wide/${wide.filename}`;
-  if (trailer) item.trailer = `/videos/${trailer.filename}`;
-
-  content[idx] = item;
-  saveAll();
-
-  res.redirect("/admin/content");
+    res.redirect("/admin/content");
+  } catch (e) { next(e); }
 }
 
-function deleteItem(req, res) {
-  const id = Number(req.params.id);
-  const idx = content.findIndex(c => Number(c.id) === id);
-  if (idx === -1) return res.status(404).send("Not found");
-  content.splice(idx, 1);
-  saveAll();
-  res.redirect("/admin/content");
+async function deleteItem(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const deleted = await Content.findOneAndDelete({ id });
+    if (!deleted) return res.status(404).send("Not found");
+    res.redirect("/admin/content");
+  } catch (e) { next(e); }
 }
 
 module.exports = {
+  // middleware
   uploadFields,
+  // pages
   listPage,
   newPage,
   editPage,
+  // actions
   createItem,
-  updateItem,
   deleteItem,
+  updateItem
 };
