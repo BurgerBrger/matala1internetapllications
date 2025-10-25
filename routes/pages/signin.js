@@ -1,7 +1,4 @@
-const express = require("express");
-const router = express.Router();
-const { render } = require("../../controllers/signin");
-
-router.get("/", render);
-
+const router = require("express").Router();
+const c = require("../../controllers/signin");
+router.get("/", c.render);
 module.exports = router;

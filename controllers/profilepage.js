@@ -1,10 +1,9 @@
-exports.render = (req, res) => {
-  res.render("profilepage");  // renders views/profilepage.ejs
+// controllers/profilepage.js
+const Profile = require("../models/mongo/Profile"); // if you list profiles on the page
+
+exports.render = async (req, res, next) => {
+  try {
+    const profiles = await Profile.find({}).sort({ id: 1 }).lean();
+    res.render("profilepage", { profiles }); // view must exist: views/profilepage.ejs
+  } catch (e) { next(e); }
 };
-
-
-function render(req, res) {
-  // 'contents' comes from models/contents.js
-  // 'feed' corresponds to views/feed.ejs
-  res.render("feed", { feeds: contents });
-}
