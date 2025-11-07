@@ -5,7 +5,7 @@ const ProfileSchema = new Schema(
   {
     id: { type: Number, index: true, unique: true }, // keep numeric id
     name: { type: String, required: true },
-    image: { type: String, default: "/images/profile/default.avif" },
+    image: { type: String, default: "/images/profile/default.jpg" },
     liked:   [{ type: Number }], // store content ids
     watched: [{ type: Number }],
     topGenres: [{ type: String }]
