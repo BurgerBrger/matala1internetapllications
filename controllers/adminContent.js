@@ -11,9 +11,9 @@ const storage = multer.diskStorage({
     const isVideo = file.mimetype === "video/mp4";
     if (isImage) {
       const sub = file.fieldname === "wideimage" ? "wide" : "card";
-      cb(null, path.join(__dirname, "..", "public", "images", sub));
+      cb(null, path.join(process.cwd(), "public", "images", sub));
     } else if (isVideo) {
-      cb(null, path.join(__dirname, "..", "public", "videos"));
+      cb(null, path.join(process.cwd(), "public", "videos"));
     } else {
       cb(new Error("Only images or MP4 videos are allowed"));
     }

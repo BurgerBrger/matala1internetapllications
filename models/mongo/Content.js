@@ -11,7 +11,15 @@ const ContentSchema = new mongoose.Schema(
     numberOfLikes: { type: Number, default: 0 },
     image: String,      // poster (card)
     wideimage: String,  // hero wide image
-    video: String       // mp4 path
+    video: String,      // mp4 path (used for movies)
+    episodes: {         // used for TV shows only
+      type: [{
+        id:   { type: Number, required: true },   // per-show episode id (e.g., 1,2,3…)
+        name: { type: String,  required: true },
+        video:{ type: String,  required: true }   // mp4 path
+      }],
+      default: []
+    }
   },
   {
     timestamps: true,

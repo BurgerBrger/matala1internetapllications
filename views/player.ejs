@@ -52,11 +52,21 @@
   </div>
 </div>
 
-  <% const src = (item && (item.trailer || item.video)) || ""; %>
+<%
+  const isShow  = item && item.type === 'tv' && Array.isArray(item.episodes) && item.episodes.length > 0;
+  const _ep     = (typeof epIndex !== 'undefined') ? Number(epIndex) : 0;  // controller may pass epIndex
+  const epIdx   = Number.isFinite(_ep) ? _ep : 0;
+  const safeIdx = isShow ? Math.max(0, Math.min(epIdx, item.episodes.length - 1)) : 0;
+  const current = isShow ? item.episodes[safeIdx] : null;
+  const src     = isShow ? (current && current.video) : ((item && (item.trailer || item.video)) || "");
+%>
 
-  <!-- 4) VIDEO PLAYER -->
-  <main id="watch" class="player-wrap container">
-    <div class="video mt-4">
+
+<!-- 4) PLAYER + (optional) EPISODE LIST -->
+<main id="watch" class="player-wrap container mt-4">
+  <div class="row">
+    <!-- video column -->
+    <div class="<%= isShow ? 'col-lg-9' : 'col-12' %>">
       <% if (src) { %>
         <video
           id="videoEl"
@@ -69,11 +79,33 @@
         </video>
       <% } else { %>
         <div class="p-4 text-center">
-          <p>No trailer/video available for this title.</p>
+          <p>No video available for this title.</p>
         </div>
       <% } %>
     </div>
-  </main>
+
+    <% if (isShow) { %>
+    <!-- episodes sidebar -->
+    <aside class="col-lg-3 mt-4 mt-lg-0">
+      <h5 class="mb-3">Episodes</h5>
+      <div class="list-group">
+        <% item.episodes.forEach((ep, i) => { %>
+          <a 
+            class="list-group-item list-group-item-action <%= i === safeIdx ? 'active' : '' %>"
+            href="/player/<%= item.id %>?ep=<%= i %>">
+            <div class="d-flex w-100 justify-content-between">
+              <strong>Ep <%= ep.id %></strong>
+              <% if (i === safeIdx) { %><span>Now Playing</span><% } %>
+            </div>
+            <small><%= ep.name %></small>
+          </a>
+        <% }) %>
+      </div>
+    </aside>
+    <% } %>
+  </div>
+</main>
+
 
   <script>
     const v = document.getElementById("videoEl");

@@ -18,7 +18,22 @@ async function fetchJSON(url, opts) {
 
 async function loadProfiles() {
   PROFILES = await fetchJSON("/api/profiles");
+
+  const hasAdmin = PROFILES.some(p => Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin");
+  if (!hasAdmin) {
+    PROFILES.unshift({
+      id: 0,
+      name: "Admin",
+      image: "/images/profile/admin.jpg",
+      liked: [],
+      watched: [],
+      topGenres: []
+    });
+  }
+  // Admin first, then by id
+  PROFILES.sort((a, b) => (a.id === 0 ? -1 : b.id === 0 ? 1 : Number(a.id) - Number(b.id)));
 }
+
 async function loadAvatars() {
   if (AVATARS.length) return AVATARS;
   AVATARS = await fetchJSON("/api/profiles/avatars");
@@ -27,21 +42,34 @@ async function loadAvatars() {
 
 /* ---------- RENDER ---------- */
 function profileCard(p) {
-  const img = p.image || "/images/profile/default.avif";
+  const img = p.image || "/images/profile/default.jpg";
+  const isAdmin = Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin";
   if (!EDIT_MODE) {
     return `
       <div class="col-6 col-md-4 col-lg-2">
-        <div class="card p-2" data-id="${p.id}">
+        <div class="card p-2" data-id="${p.id}" data-name="${p.name}">
           <img src="${img}" class="card-img-top" alt="${p.name}">
           <p class="name mt-2">${p.name}</p>
         </div>
       </div>`;
   }
 
-  // EDIT MODE: non-clickable card + overlay icons + inline name input
+  if (isAdmin) {
+    // Admin: no overlay icons, name disabled
+    return `
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="card p-2 edit" data-id="${p.id}" data-name="${p.name}">
+          <div class="img-wrap" style="position:relative">
+            <img src="${img}" class="card-img-top" alt="${p.name}">
+          </div>
+          <input class="name-input mt-2" value="${p.name}" disabled />
+        </div>
+      </div>`;
+  }
+  // Regular profile: show edit/delete overlay + editable name
   return `
     <div class="col-6 col-md-4 col-lg-2">
-      <div class="card p-2 edit" data-id="${p.id}">
+      <div class="card p-2 edit" data-id="${p.id}" data-name="${p.name}">
         <div class="img-wrap" style="position:relative">
           <img src="${img}" class="card-img-top" alt="${p.name}">
           <div class="hover-overlay">
@@ -73,11 +101,21 @@ function render() {
 function attachViewHandlers() {
   const root = document.getElementById("profiles");
   root.addEventListener("click", (e) => {
-    if (EDIT_MODE) { e.preventDefault(); return; }  // defensive
+    if (EDIT_MODE) { e.preventDefault(); return; }
+
     const card = e.target.closest(".card");
     if (!card) return;
+
     const id = card.dataset.id;
-    const p = PROFILES.find(x => String(x.id) === String(id));
+    const p  = PROFILES.find(x => String(x.id) === String(id));
+
+    // Admin shortcut
+    if (String(id) === "0" || (p && (p.name || "").toLowerCase() === "admin")) {
+      window.location.href = "/admin/content";
+      return;
+    }
+
+    // Regular profile → feed
     localStorage.setItem("selectedProfileId", String(id));
     localStorage.setItem("selectedProfileName", p ? p.name : "");
     localStorage.setItem("profiles", JSON.stringify(PROFILES));
@@ -85,11 +123,12 @@ function attachViewHandlers() {
   });
 }
 
+
 /* ---------- EDIT MODE HANDLERS ---------- */
 function attachEditHandlers() {
   const root = document.getElementById("profiles");
 
-  // Add profile → server sets default image `/images/profile/default.avif`
+  // Add profile → server sets default image `/images/profile/default.jpg`
   root.addEventListener("click", async (e) => {
     const add = e.target.closest("#addProfileCard");
     if (!add) return;
@@ -118,6 +157,7 @@ function attachEditHandlers() {
   async function saveName(input) {
     const card = input.closest(".card");
     const id = card.dataset.id;
+    if (String(id) === "0") return; // ⟵ added
     const name = input.value.trim();
     const updated = await fetchJSON(`/api/profiles/${id}`, {
       method: "PUT",
@@ -135,6 +175,7 @@ function attachEditHandlers() {
     if (!icon) return;
     const card = icon.closest(".card");
     const id = card.dataset.id;
+    if (String(id) === "0") return;
 
     // open modal & load avatars
     const modal = document.getElementById("avatarModal");
@@ -170,6 +211,7 @@ function attachEditHandlers() {
     if (!icon) return;
     const card = icon.closest(".card");
     const id = card.dataset.id;
+    if (String(id) === "0") { alert("Admin profile cannot be deleted."); return; }
     if (!confirm("Delete this profile? This cannot be undone.")) return;
     await fetchJSON(`/api/profiles/${id}`, { method: "DELETE" });
     PROFILES = PROFILES.filter(p => String(p.id) !== String(id));

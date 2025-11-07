@@ -3,6 +3,7 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const { connectDB } = require("./db");
+const { ensureAdminProfile } = require("./controllers/profiles");
 
 const app = express();
 
@@ -14,6 +15,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+// sessions
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+app.use(session({
+  secret: process.env.SESSION_SECRET || "change-me",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  cookie: { httpOnly: true, maxAge: 1000*60*60*24 }
+}));
 
 // page routes
 app.use("/signin", require("./routes/pages/signin"));
@@ -40,6 +52,7 @@ app.use((err, _req, res, _next) => {
 // start server only after DB connects
 (async () => {
   await connectDB(process.env.MONGODB_URI);
+  try { await ensureAdminProfile(); } catch (e) { console.error("ensureAdminProfile failed:", e); }
   const PORT = process.env.PORT || 5050;
   app.listen(PORT, () => console.log("server is running", PORT));
 })();

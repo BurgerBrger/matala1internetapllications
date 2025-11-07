@@ -1,4 +1,8 @@
 // controllers/profiles.js
+
+const fs = require("fs");
+const path = require("path");
+
 const Profile = require("../models/mongo/Profile");
 
 // list
@@ -25,7 +29,7 @@ exports.create = async (req, res, next) => {
     const p = await Profile.create({
       id: nextId,
       name: (req.body?.name || "New Profile").trim() || "New Profile",
-      image: "/images/profile/default.avif",
+      image: "/images/profile/default.jpg",
       liked: [], watched: [], topGenres: []
     });
     res.status(201).json(p.toObject());
@@ -65,5 +69,16 @@ exports.updateImage = async (req, res, next) => {
     ).lean();
     if (!p) return res.status(404).json({ error: "Not found" });
     res.json(p);
+  } catch (e) { next(e); }
+};
+
+exports.avatarLibrary = (req, res, next) => {
+  try {
+    const dir = path.join(process.cwd(), "public", "images", "profile");
+    const urls = fs.readdirSync(dir)
+      .filter(n => /\.(png|jpe?g|webp|avif|gif|svg)$/i.test(n))
+      .sort()
+      .map(n => `/images/profile/${n}`);
+    res.json(urls);
   } catch (e) { next(e); }
 };
