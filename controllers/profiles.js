@@ -49,9 +49,10 @@ exports.get = async (req, res, next) => {
     const p = await Profile.findOne({ id }).lean();
     if (!p) return res.status(404).json({ error: "Not found" });
 
-    // allow if the profile id is in user's profiles array or the user is admin
-    const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
-    if (!isAdmin && !(Array.isArray(user.profiles) && user.profiles.includes(id))) return res.status(403).json({ error: 'Forbidden' });
+  // allow if the profile id is in user's profiles array or the user is admin
+  const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
+  const userProfileIds = Array.isArray(user.profiles) ? user.profiles.map(p => Number(p)) : [];
+  if (!isAdmin && !userProfileIds.includes(id)) return res.status(403).json({ error: 'Forbidden' });
     res.json(p);
   } catch (e) { next(e); }
 };
@@ -90,8 +91,9 @@ exports.update = async (req, res, next) => {
     const existing = await Profile.findOne({ id }).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
     // only admin or owner (owner if user's profiles array includes the profile id)
-    const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
-    if (!isAdmin && !(Array.isArray(user.profiles) && user.profiles.includes(id))) return res.status(403).json({ error: 'Forbidden' });
+  const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
+  const userProfileIds = Array.isArray(user.profiles) ? user.profiles.map(p => Number(p)) : [];
+  if (!isAdmin && !userProfileIds.includes(id)) return res.status(403).json({ error: 'Forbidden' });
 
     const patch = {};
     if (req.body?.name  !== undefined) patch.name  = req.body.name;
@@ -111,8 +113,9 @@ exports.remove = async (req, res, next) => {
     const id = Number(req.params.id);
     const existing = await Profile.findOne({ id }).lean();
     if (!existing) return res.status(404).json({ error: 'Not found' });
-    const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
-    if (!isAdmin && !(Array.isArray(user.profiles) && user.profiles.includes(id))) return res.status(403).json({ error: 'Forbidden' });
+  const isAdmin = user.email === 'admin@example.com' || user.usernumber === 3;
+  const userProfileIds = Array.isArray(user.profiles) ? user.profiles.map(p => Number(p)) : [];
+  if (!isAdmin && !userProfileIds.includes(id)) return res.status(403).json({ error: 'Forbidden' });
 
     const out = await Profile.findOneAndDelete({ id }).lean();
     // remove the id from the user's profiles array
