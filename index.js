@@ -40,6 +40,30 @@ app.get("/", (_req, res) => res.redirect("/signin"));
 // API routes
 app.use("/api/content", require("./routes/api/content"));
 app.use("/api/profiles", require("./routes/api/profiles"));
+const User = require('./models/mongo/users');
+
+// GET /api/me - return basic session user info
+app.get('/api/me', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) return res.json({ loggedIn: false });
+    const user = await User.findById(req.session.userId).lean();
+    if (!user) return res.json({ loggedIn: false });
+    res.json({ loggedIn: true, id: String(user._id), email: user.email, usernumber: user.usernumber || 0 });
+  } catch (e) {
+    console.error('GET /api/me error', e);
+    res.status(500).json({ loggedIn: false });
+  }
+});
+
+// logout endpoint (client should POST to this)
+app.post('/logout', (req, res) => {
+  if (req.session) {
+    req.session.destroy(err => {
+      if (err) return res.status(500).json({ ok: false });
+      res.json({ ok: true });
+    });
+  } else res.json({ ok: true });
+});
 
 
 // 404 + error handler

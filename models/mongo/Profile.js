@@ -8,7 +8,9 @@ const ProfileSchema = new Schema(
     image: { type: String, default: "/images/profile/default.jpg" },
     liked:   [{ type: Number }], // store content ids
     watched: [{ type: Number }],
-    topGenres: [{ type: String }]
+    topGenres: [{ type: String }],
+    // associate this profile with a user (usernumber defined on User document)
+    usernumber: { type: Number, default: 0, index: true }
   },
   { timestamps: true }
 );

@@ -4,15 +4,19 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest("#logoutBtn");
   if (!btn) return;
   e.preventDefault();
-  localStorage.clear();
-  window.location.href = "/";
+  // call server logout to destroy session
+  fetch('/logout', { method: 'POST', credentials: 'same-origin' })
+    .then(() => {
+      localStorage.clear();
+      window.location.href = '/signin';
+    })
+    .catch(() => { localStorage.clear(); window.location.href = '/signin'; });
 });
 
 
-
 document.addEventListener("DOMContentLoaded", () => {
-const searchBtn = document.getElementById("searchBtn");
-const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const searchInput = document.getElementById("searchInput");
 
   if (searchBtn && searchInput) {
     searchBtn.addEventListener("click", () => {
@@ -23,4 +27,14 @@ const searchInput = document.getElementById("searchInput");
       window.location.href = "../feed/feed.html";
     });
   }
+
+  // fetch current user info and show in navbar
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.loggedIn) {
+        const el = document.getElementById('userEmail');
+        if (el) el.textContent = data.email || '';
+      }
+    }).catch(() => {});
 });
