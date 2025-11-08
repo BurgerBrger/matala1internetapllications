@@ -54,7 +54,7 @@ app.get('/api/me', async (req, res) => {
     if (!req.session || !req.session.userId) return res.json({ loggedIn: false });
     const user = await User.findById(req.session.userId).lean();
     if (!user) return res.json({ loggedIn: false });
-    res.json({ loggedIn: true, id: String(user._id), email: user.email, usernumber: user.usernumber || 0 });
+  res.json({ loggedIn: true, id: String(user._id), email: user.email, usernumber: user.usernumber || 0, profiles: Array.isArray(user.profiles) ? user.profiles : [] });
   } catch (e) {
     console.error('GET /api/me error', e);
     res.status(500).json({ loggedIn: false });
