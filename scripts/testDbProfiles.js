@@ -11,11 +11,15 @@
   const Profile = require('../models/mongo/Profile');
   const user = await User.findOne({ email }).lean();
   if (!user) { console.error('User not found:', email); process.exit(3); }
-  console.log('User:', user.email, 'usernumber=', user.usernumber);
+  console.log('User:', user.email, 'usernumber=', user.usernumber, 'profiles=', user.profiles);
   let filter = {};
-  if (user.usernumber === 0) filter = {};
-  else if (typeof user.usernumber === 'number') filter = { usernumber: user.usernumber };
-  else { console.log('Invalid usernumber, returning empty'); console.log([]); process.exit(0); }
+  if (Array.isArray(user.profiles) && user.profiles.length > 0) {
+    filter = { id: { $in: user.profiles } };
+  } else {
+    console.log('User has no profiles -> returning empty');
+    console.log([]);
+    process.exit(0);
+  }
   const docs = await Profile.find(filter).sort({ id: 1 }).lean();
   console.log('Profiles visible to', email, JSON.stringify(docs, null, 2));
   process.exit(0);

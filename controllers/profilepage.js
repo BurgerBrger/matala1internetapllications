@@ -11,15 +11,11 @@ exports.render = async (req, res, next) => {
     const user = await User.findById(req.session.userId).lean();
     if (!user) return res.redirect('/signin');
 
-    // admin (usernumber 0) sees all profiles
+    // New ownership model: user has `profiles` array with numeric profile ids
     let profiles = [];
-    if (user.usernumber === 0) {
-      profiles = await Profile.find({}).lean();
-    } else if (typeof user.usernumber === 'number') {
-      // only profiles with a matching numeric usernumber
-      profiles = await Profile.find({ usernumber: user.usernumber }).lean();
+    if (Array.isArray(user.profiles) && user.profiles.length > 0) {
+      profiles = await Profile.find({ id: { $in: user.profiles } }).lean();
     } else {
-      // no valid usernumber -> no profiles
       profiles = [];
     }
     profiles.sort((a, b) => (a.id === 0 ? -1 : b.id === 0 ? 1 : a.id - b.id));
