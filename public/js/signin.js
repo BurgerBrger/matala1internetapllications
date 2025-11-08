@@ -52,7 +52,7 @@ btn.addEventListener("click", () => {
   showSuccess();
 
   localStorage.setItem("login-user", email.value);
-  setTimeout(() => {
-    window.location.href = "/profile";
-  }, 1500);
+  // submit the form to the server for real authentication
+  const form = document.getElementById('loginForm');
+  if (form) form.submit();
 });

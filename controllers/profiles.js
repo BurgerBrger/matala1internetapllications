@@ -72,6 +72,19 @@ exports.updateImage = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+// ensure there is an admin/profile with id 0 (used at app startup)
+exports.ensureAdminProfile = async () => {
+  try {
+    const existing = await Profile.findOne({ id: 0 }).lean();
+    if (!existing) {
+      await Profile.create({ id: 0, name: 'Admin', image: '/images/profile/default.avif', liked: [], watched: [], topGenres: [] });
+    }
+  } catch (e) {
+    // rethrow so caller can log
+    throw e;
+  }
+};
+
 exports.avatarLibrary = (req, res, next) => {
   try {
     const dir = path.join(process.cwd(), "public", "images", "profile");
