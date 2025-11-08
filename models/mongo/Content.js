@@ -12,7 +12,6 @@ const ContentSchema = new mongoose.Schema(
     image: String,      // poster (card)
     wideimage: String,  // hero wide image
     video: String,      // mp4 path (used for movies)
-    // topActors: optional array of top-billed actor names (saved in DB)
     topActors: { type: [String], default: [] },
   // TMDB integration: optional TMDB id and cached rating
   tmdbId: Number,

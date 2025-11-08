@@ -20,6 +20,7 @@ basic_information
                 terminal: npm start
             dev version:
                 terminal: npm dev
+                npx nodemon index.js
             the scripts are in package.json
     
 project structure:

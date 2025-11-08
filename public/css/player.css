@@ -12,7 +12,7 @@
 }
 
 .topSpacer{
-  min-height: 80px; /* Increase spacer so hero does not hide under a taller navbar */
+  min-height: 60px; /* Adjust this value to match the navbar height */
 }
 
 .player {
@@ -24,19 +24,7 @@
 
 
 /* --- Player hero overrides (do not affect feed) --- */
-.player .topContent { position: relative; height: 440px; padding-top: 8px; }
-
-/* ensure background image sizing for player (similar to feed but tuned) */
-.player .topContent .bgImg {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  min-width: 45%;
-  object-fit: cover;
-  z-index: 1;
-  filter: brightness(0.6);
-}
+.player .topContent { position: relative; height: 400px; }
 
 /* ensure the gradient overlay sits above the image but below the text */
 .player .topContentOverlay {
@@ -48,14 +36,12 @@
 .player .topContentInfo {
   position: absolute;      /* fill the hero vertically */
   left: 0; top: 0; bottom: 0;
-  z-index: 3;
+  z-index: 2;
   display: flex;            /* center the row vertically */
   align-items: center;
-  max-width: min(54%, 900px);
-  padding-left: clamp(18px, 4vw, 56px);
+  max-width: min(60%, 900px);
+  padding-left: clamp(16px, 3vw, 48px);
   padding-right: clamp(12px, 2vw, 32px);
-  /* add a subtle left-to-right gradient to improve text contrast */
-  background: linear-gradient(90deg, rgba(20,20,20,0.75) 0%, rgba(20,20,20,0.35) 35%, rgba(20,20,20,0.0) 100%);
 }
 
 /* row: poster + text side-by-side */
@@ -72,9 +58,8 @@
   left: 0; top: 0; bottom: 0;
   z-index: 2;
   align-items: center;
-  height: 340px;
+  height: 350px;
   border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
 }
 
 .player .player-hero-info { 
@@ -84,16 +69,7 @@
 
 @media (max-width: 576px) {
   .player .player-hero-row { flex-wrap: wrap; }
-  .player .poster-in-hero { width: 130px; height: 180px; margin-bottom: 12px; }
-  .player .topContentInfo { padding-left: 12px; padding-right: 12px; }
-}
-
-@media (max-width: 900px) {
-  /* make the hero taller on narrow desktop/tablet to avoid cramped text */
-  .player .topContent { height: 520px; }
-  .player .poster-in-hero { height: 300px; }
-  .player .topContentInfo { max-width: 100%; padding-left: 20px; }
-  .player .topContent .bgImg { min-width: 55%; }
+  .player .poster-in-hero { width: 130px; }
 }
 
 /* --- Episode progress bar --- */
@@ -209,114 +185,30 @@
 }
 
 /* Starring actor buttons */
-/* Starring actor buttons */
 .player .starring { color: #fff; }
 .player .starring strong { color: #fff; margin-right: 8px; font-weight:600; }
-.player .starring .actor-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .player .starring .actor-btn {
   display: inline-block;
-  margin: 0;
-  padding: 6px 10px;
-  background: rgba(255,255,255,0.04);
+  margin: 0 6px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.06);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 6px;
   text-decoration: none;
-  font-size: 0.9rem;
-  width: fit-content;
+  font-size: 0.95rem;
   transition: background 120ms ease, transform 120ms ease;
 }
 .player .starring .actor-btn:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.14);
   color: #fff;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
-/* Make action buttons a bit smaller on player hero */
-.player .player-actions .btn { padding: 8px 14px; font-size: 0.95rem; min-width: 110px; }
-
-/* Force actions to align and keep the starring block below them */
-.player .player-hero-info .player-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
+.genres-pill {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 12px;
 }
-
-.player .player-actions .btn {
-  padding: 6px 10px !important;
-  font-size: 0.88rem !important;
-  min-width: 90px !important;
-  height: auto !important;
-}
-
-.player .starring { margin-top: 6px; }
-.player .starring .actor-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-.player .starring .actor-btn {
-  padding: 4px 8px !important;
-  font-size: 0.82rem !important;
-  min-width: 0 !important;
-  width: auto !important;
-}
-
-/* Tighten spacing on hero to prevent very large buttons from pushing layout */
-.player .topContentInfo .buttons, .player .topContentInfo .player-actions { margin-bottom: 0.25rem; }
-
-/* Make the main hero CTAs smaller so they don't dominate layout
-   Targets: Start watching (#primaryAction), Start over (#secondaryAction) and
-   the Return to feed anchor that sits in the same top-row */
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn,
-.player .topContentInfo > .player-hero-row .player-hero-info a.btn {
-  padding: 6px 10px !important;
-  font-size: 0.88rem !important;
-  min-width: 0 !important;
-  width: auto !important;
-  height: auto !important;
-  line-height: 1.1 !important;
-}
-
-/* Slightly tighten spacing between these CTAs */
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex { gap: 8px; }
-
-/* --- Unified action button appearance (primary / secondary) --- */
-.player .player-actions .btn,
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn,
-.player .topContentInfo > .player-hero-row .player-hero-info a.btn {
-  border-radius: 8px;
-  padding: 6px 12px !important;
-  font-weight: 600;
-  color: #fff !important;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* primary (red) */
-.player .player-actions .btn.primary,
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn.btn-danger,
-.player .topContentInfo > .player-hero-row .player-hero-info a.btn.primary {
-  background: var(--main-color) !important;
-  color: #fff !important;
-}
-.player .player-actions .btn.primary:hover,
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn.btn-danger:hover {
-  background: var(--dark-main-color) !important;
-}
-
-/* secondary (gray) */
-.player .player-actions .btn.secondary,
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn.btn-secondary,
-.player .topContentInfo > .player-hero-row .player-hero-info a.btn.secondary {
-  background: rgba(255,255,255,0.12) !important;
-  color: #fff !important;
-}
-.player .player-actions .btn.secondary:hover,
-.player .topContentInfo > .player-hero-row .player-hero-info .d-flex > .btn.btn-secondary:hover {
-  background: rgba(255,255,255,0.18) !important;
-}
-
-

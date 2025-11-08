@@ -30,13 +30,56 @@
       </div>
     </div>
 
+    <div class="midSpacer"></div>
+
     <div class="feed-header">
       <div class="feed-header title">Contents Catalog</div>
+
       <div class="feed-header-actions">
+        <!-- sort buttons -->
         <button id="sortBtn" class="feed-header btn">Sort A–Z</button>
         <button id="sortByGradeBtn" class="feed-header btn">Sort by grade ↓</button>
+
+        <!-- status filter -->
+        <div class="filter-group">
+          <span class="filter-label">Status:</span>
+          <button class="feed-header btn filter-status" data-status="unwatched">Unwatched</button>
+          <button class="feed-header btn filter-status" data-status="watching">Watching</button>
+          <button class="feed-header btn filter-status" data-status="watched">Watched</button>
+        </div>
+
+        <!-- genre filter -->
+        <div class="filter-group genre-filter">
+          <button id="genreFilterToggle" class="feed-header btn">Filter by genres</button>
+
+          <div id="genreFilterPanel" class="genre-filter-panel">
+            <div class="genre-filter-header">
+              <span>Select genres</span>
+            </div>
+
+            <!-- JS fills this -->
+            <div id="genreFilterGrid" class="genre-filter-grid"></div>
+
+            <div class="genre-filter-actions">
+              <button id="genreApplyBtn" class="feed-header btn small">Apply</button>
+              <button id="genreClearBtn" class="feed-header btn small secondary">Clear</button>
+              <button id="genreCancelBtn" class="feed-header btn small secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- search box: on the right of filters -->
+        <div class="feed-search">
+          <div class="search-box">
+            <input id="searchInput" type="text" placeholder="Search..." />
+            <button id="feedSearchBtn" type="button">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+
     <div id="feedContainer" class="feed-row"></div>
 </main>
 

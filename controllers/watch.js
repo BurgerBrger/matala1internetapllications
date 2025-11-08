@@ -54,30 +54,52 @@ exports.saveProgress = async (req, res, next) => {
       w => Number(w.contentId) === cid && Number(w.episodeIndex) === epIdx
     );
 
+        const posNum = Number(position) || 0;
+    const durNum = Number(duration) || 0;
+    const ratio = durNum > 0 ? posNum / durNum : 0;
+    const isCompleted = !!completed || ratio >= 0.95;
+
     if (!row) {
       row = {
         contentId: cid,
         episodeIndex: epIdx,
-        position,
-        duration,
-        completed: !!completed,
+        position: posNum,
+        duration: durNum,
+        completed: isCompleted,
         updatedAt: new Date()
       };
       profile.watchProgress.push(row);
     } else {
-      row.position = position;
-      row.duration = duration;
-      row.completed = !!completed;
+      row.position = posNum;
+      row.duration = durNum;
+      row.completed = isCompleted;
       row.updatedAt = new Date();
     }
 
     // if completed, also maintain watched/topGenres arrays
-    if (completed) {
+    if (row.completed) {
       const content = await Content.findOne({ id: cid }).lean();
       if (content) {
-        if (!profile.watched.includes(cid)) {
+        // 1) update watched[]: movies immediately, shows only when all eps done
+        let shouldMarkWatched = true;
+        if (content.type === "show" && Array.isArray(content.episodes) && content.episodes.length > 0) {
+          const epCount = content.episodes.length;
+          const allRows = profile.watchProgress.filter(w => Number(w.contentId) === cid);
+          shouldMarkWatched = true;
+          for (let i = 0; i < epCount; i++) {
+            const r = allRows.find(w => Number(w.episodeIndex) === i);
+            if (!r || !r.completed) {
+              shouldMarkWatched = false;
+              break;
+            }
+          }
+        }
+
+        if (shouldMarkWatched && !profile.watched.includes(cid)) {
           profile.watched.push(cid);
         }
+
+        // 2) genres the profile tends to watch
         if (Array.isArray(content.genre)) {
           content.genre.forEach(g => {
             if (!profile.topGenres.includes(g)) {
@@ -87,6 +109,7 @@ exports.saveProgress = async (req, res, next) => {
         }
       }
     }
+
 
     await profile.save();
 
