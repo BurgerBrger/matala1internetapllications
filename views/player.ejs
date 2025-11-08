@@ -47,9 +47,15 @@
             <button id="primaryAction" class="btn btn-danger px-4">Start watching</button>
             <button id="secondaryAction" class="btn btn-secondary px-4">Start over</button>
             <a href="/feed" class="btn btn-secondary px-4">Return to feed</a>
+        <div class="buttons player-actions">
+          <a href="#watch" class="btn primary">Watch Now</a>
+          <a href="/feed" class="btn secondary">Back to feed</a>
+        </div>
+
         <% if (Array.isArray(item.topActors) && item.topActors.length) { %>
           <div class="mb-2 starring">
             <strong>Starring:</strong>
+            <div class="actor-list">
             <% item.topActors.slice(0,3).forEach(function(actor){ %>
               <a
                 class="actor-btn"
@@ -59,13 +65,9 @@
                 <%= actor %>
               </a>
             <% }) %>
+            </div>
           </div>
         <% } %>
-
-        <div class="buttons">
-          <a href="#watch" class="btn primary">Watch Now</a>
-          <a href="/feed" class="btn secondary">Back to feed</a>
-        </div>
       </div>
     </div>
   </div>
