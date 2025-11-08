@@ -11,7 +11,8 @@ let PROFILES = [];
 let AVATARS = []; // cache
 
 async function fetchJSON(url, opts) {
-  const res = await fetch(url, opts);
+  const defaultOpts = { credentials: 'same-origin' };
+  const res = await fetch(url, Object.assign(defaultOpts, opts || {}));
   if (!res.ok) throw new Error(`${opts?.method || "GET"} ${url} -> ${res.status}`);
   return res.json();
 }
@@ -31,7 +32,9 @@ async function loadProfiles() {
     });
   }
   // Admin first, then by id
-  PROFILES.sort((a, b) => (a.id === 0 ? -1 : b.id === 0 ? 1 : Number(a.id) - Number(b.id)));
+  // do not inject a fake Admin card here; server should return only allowed profiles
+  // sort by id (admin/profile ordering should be controlled server-side)
+  PROFILES.sort((a, b) => Number(a.id) - Number(b.id));
 }
 
 async function loadAvatars() {
@@ -43,7 +46,8 @@ async function loadAvatars() {
 /* ---------- RENDER ---------- */
 function profileCard(p) {
   const img = p.image || "/images/profile/default.jpg";
-  const isAdmin = Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin";
+  // treat profile as admin if it explicitly has usernumber 3 (special admin) or id/name fallback
+  const isAdmin = Number(p.usernumber) === 3 || Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin";
   if (!EDIT_MODE) {
     return `
       <div class="col-6 col-md-4 col-lg-2">

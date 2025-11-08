@@ -28,9 +28,20 @@ exports.login = async (req, res, next) => {
     if (!match) return res.status(401).render('signin', { error: 'Invalid email or password' });
 
     // authentication succeeded — set session and redirect to profiles page
+    // ensure we have the canonical user document (not lean) so we can update usernumber for special admin
+    const userDoc = await User.findOne({ email });
+    if (!userDoc) return res.status(500).render('signin', { error: 'Server error' });
+
+    // if there's a special admin email that should have usernumber 3, enforce it
+    if (userDoc.email === 'admin@example.com' && userDoc.usernumber !== 3) {
+      userDoc.usernumber = 3;
+      await userDoc.save();
+    }
+
     if (req.session) {
-      req.session.userId = user._id;
-      req.session.userEmail = user.email;
+      req.session.userId = String(userDoc._id);
+      req.session.userEmail = userDoc.email;
+      req.session.usernumber = userDoc.usernumber || 0;
     }
     return res.redirect('/profile');
   } catch (e) { next(e); }
