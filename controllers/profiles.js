@@ -9,6 +9,12 @@ const User = require("../models/mongo/users");
 // list - return only profiles visible to the logged-in user
 exports.list = async (req, res, next) => {
   try {
+    // DEBUG: log basic session info to help debug which user is requesting profiles
+    try {
+      const dbgSession = { hasSession: !!req.session, userId: req.session?.userId, userEmail: req.session?.userEmail, usernumber: req.session?.usernumber };
+      console.log('DEBUG GET /api/profiles - session:', dbgSession);
+    } catch (e) { console.error('DEBUG session read error', e); }
+
     if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
     const user = await User.findById(req.session.userId).lean();
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -19,10 +25,14 @@ exports.list = async (req, res, next) => {
     } else if (typeof user.usernumber === 'number') {
       filter = { usernumber: user.usernumber };
     } else {
+      console.log('DEBUG GET /api/profiles - invalid usernumber on user:', user.usernumber);
       return res.json([]);
     }
 
+    console.log('DEBUG GET /api/profiles - computed filter:', JSON.stringify(filter));
+
     const docs = await Profile.find(filter).sort({ id: 1 }).lean();
+    console.log('DEBUG GET /api/profiles - returning', Array.isArray(docs) ? docs.length : 0, 'profiles');
     res.json(docs);
   }
   catch (e) { next(e); }
