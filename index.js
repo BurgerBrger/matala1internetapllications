@@ -44,6 +44,8 @@ app.get("/", (_req, res) => res.redirect("/signin"));
 // API routes
 app.use("/api/content", require("./routes/api/content"));
 app.use("/api/profiles", require("./routes/api/profiles"));
+app.use("/api/watch", require("./routes/api/watch"));
+
 const User = require('./models/mongo/users');
 
 // GET /api/me - return basic session user info

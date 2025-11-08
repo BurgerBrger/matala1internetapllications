@@ -11,6 +11,38 @@ function saveLikes() {
   localStorage.setItem("likedIds", JSON.stringify([...likedSet]));
 }
 
+// --- Genre stats (for recommendations) stored per profile ---
+function genreStatsStorageKey() {
+  const pid = getSelectedProfileId();
+  return pid ? `genreStats:${pid}` : null;
+}
+function loadGenreStats() {
+  const key = genreStatsStorageKey();
+  if (!key) return {};
+  try {
+    return JSON.parse(localStorage.getItem(key) || "{}");
+  } catch {
+    return {};
+  }
+}
+function saveGenreStats(stats) {
+  const key = genreStatsStorageKey();
+  if (!key) return;
+  localStorage.setItem(key, JSON.stringify(stats));
+}
+function bumpLikedGenres(genres, delta) {
+  const key = genreStatsStorageKey();
+  if (!key || !Array.isArray(genres) || !genres.length) return;
+  const stats = loadGenreStats();
+  genres.forEach(g => {
+    if (!stats[g]) stats[g] = { watched: 0, liked: 0 };
+    stats[g].liked = (stats[g].liked || 0) + delta;
+    if (stats[g].liked < 0) stats[g].liked = 0;
+  });
+  saveGenreStats(stats);
+}
+
+
 // ----- Helpers -----
 async function fetchJSON(url) {
   const res = await fetch(url);
@@ -102,9 +134,14 @@ document.addEventListener("click", async (e) => {
     alert("Select a profile first.");
     return;
   }
-
   const countEl = btn.parentElement.querySelector(".like-count");
   const isNowLiked = !btn.classList.contains("liked");
+
+  // find genres of this title so we can keep per-profile stats
+  const fullList = window.__ALL_CONTENT__ || [];
+  const contentItem = fullList.find(m => Number(m.id) === id);
+  const genres = contentItem && Array.isArray(contentItem.genre) ? contentItem.genre : [];
+
 
   try {
     const endpoint = isNowLiked ? "like" : "unlike";
@@ -123,8 +160,13 @@ document.addEventListener("click", async (e) => {
     // keep the local set in sync for render/search/sort redraws
     if (data.liked) likedSet.add(String(id));
     else likedSet.delete(String(id));
-  } catch (err) {
-    console.error(err);
+
+    // update genre stats (liked counter)
+    if (genres.length) {
+      bumpLikedGenres(genres, data.liked ? +1 : -1);
+    }
+    } catch (err) {
+    console.error("like/unlike failed", err);
   }
 });
 

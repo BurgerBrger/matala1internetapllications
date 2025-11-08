@@ -71,3 +71,20 @@
   .player .player-hero-row { flex-wrap: wrap; }
   .player .poster-in-hero { width: 130px; }
 }
+
+/* --- Episode progress bar --- */
+.list-group-item .episode-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.list-group-item .episode-progress-inner {
+  height: 100%;
+  width: 0;
+  background: var(--main-color);
+  transition: width 0.25s linear;
+}
+
