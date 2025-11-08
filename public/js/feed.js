@@ -197,6 +197,33 @@ function attachSort(content) {
   });
 }
 
+function ratingValue(m) {
+  // Prefer object path m.tmdb.rating, then m.tmdbRating, then numeric m.rating
+  const r = (m && m.tmdb && (m.tmdb.rating !== undefined ? m.tmdb.rating : null)) ?? (m && m.tmdbRating !== undefined ? m.tmdbRating : (m && m.rating !== undefined ? m.rating : null));
+  const n = Number(r);
+  // if not a valid number, return -Infinity so ungraded items fall to the end when sorting desc
+  return Number.isFinite(n) ? n : -Infinity;
+}
+
+function attachSortByGrade(content) {
+  const btn = document.getElementById('sortByGradeBtn');
+  if (!btn) return;
+  // start with descending (highest first)
+  let desc = true;
+  btn.addEventListener('click', () => {
+    const sorted = [...content].sort((a, b) => {
+      const ra = ratingValue(a);
+      const rb = ratingValue(b);
+      // compare numbers; for equal ratings fall back to name
+      if (ra === rb) return a.name.localeCompare(b.name);
+      return desc ? (rb - ra) : (ra - rb);
+    });
+    desc = !desc;
+    btn.textContent = desc ? 'Sort by grade ↓' : 'Sort by grade ↑';
+    renderList(sorted);
+  });
+}
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -219,6 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     renderList(all);
     attachSort(all);
+  attachSortByGrade(all);
     // populate ratings asynchronously for visible cards (no DB writes)
     populateRatings();
   } catch (err) {
