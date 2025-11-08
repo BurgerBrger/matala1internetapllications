@@ -47,6 +47,24 @@
             <button id="primaryAction" class="btn btn-danger px-4">Start watching</button>
             <button id="secondaryAction" class="btn btn-secondary px-4">Start over</button>
             <a href="/feed" class="btn btn-secondary px-4">Return to feed</a>
+        <% if (Array.isArray(item.topActors) && item.topActors.length) { %>
+          <div class="mb-2 starring">
+            <strong>Starring:</strong>
+            <% item.topActors.slice(0,3).forEach(function(actor){ %>
+              <a
+                class="actor-btn"
+                href="https://en.wikipedia.org/wiki/<%= encodeURIComponent(actor.replace(/ /g, '_')) %>"
+                target="_blank"
+                rel="noopener noreferrer">
+                <%= actor %>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <div class="buttons">
+          <a href="#watch" class="btn primary">Watch Now</a>
+          <a href="/feed" class="btn secondary">Back to feed</a>
         </div>
       </div>
     </div>

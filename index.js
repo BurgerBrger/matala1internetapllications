@@ -45,6 +45,7 @@ app.get("/", (_req, res) => res.redirect("/signin"));
 app.use("/api/content", require("./routes/api/content"));
 app.use("/api/profiles", require("./routes/api/profiles"));
 app.use("/api/watch", require("./routes/api/watch"));
+app.use('/api/tmdb', require('./routes/api/tmdb'));
 
 const User = require('./models/mongo/users');
 
@@ -54,7 +55,7 @@ app.get('/api/me', async (req, res) => {
     if (!req.session || !req.session.userId) return res.json({ loggedIn: false });
     const user = await User.findById(req.session.userId).lean();
     if (!user) return res.json({ loggedIn: false });
-    res.json({ loggedIn: true, id: String(user._id), email: user.email, usernumber: user.usernumber || 0 });
+  res.json({ loggedIn: true, id: String(user._id), email: user.email, usernumber: user.usernumber || 0, profiles: Array.isArray(user.profiles) ? user.profiles : [] });
   } catch (e) {
     console.error('GET /api/me error', e);
     res.status(500).json({ loggedIn: false });
@@ -71,6 +72,12 @@ app.post('/logout', (req, res) => {
   } else res.json({ ok: true });
 });
 
+
+// debug: log each unmatched request path (temporary)
+app.use((req, res, next) => {
+  console.log('[REQ]', req.method, req.path);
+  next();
+});
 
 // 404 + error handler
 app.use((req, res) => res.status(404).send("Not found"));

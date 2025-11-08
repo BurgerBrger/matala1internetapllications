@@ -33,8 +33,13 @@ exports.login = async (req, res, next) => {
     if (!userDoc) return res.status(500).render('signin', { error: 'Server error' });
 
     // if there's a special admin email that should have usernumber 3, enforce it
-    if (userDoc.email === 'admin@example.com' && userDoc.usernumber !== 3) {
-      userDoc.usernumber = 3;
+    if (userDoc.email === 'admin@example.com') {
+      if (userDoc.usernumber !== 3) {
+        userDoc.usernumber = 3;
+      }
+      // ensure admin user includes the admin profile id (0)
+      if (!Array.isArray(userDoc.profiles)) userDoc.profiles = [];
+      if (!userDoc.profiles.includes(0)) userDoc.profiles.push(0);
       await userDoc.save();
     }
 
@@ -42,6 +47,7 @@ exports.login = async (req, res, next) => {
       req.session.userId = String(userDoc._id);
       req.session.userEmail = userDoc.email;
       req.session.usernumber = userDoc.usernumber || 0;
+      req.session.profiles = Array.isArray(userDoc.profiles) ? userDoc.profiles : [];
     }
     return res.redirect('/profile');
   } catch (e) { next(e); }
