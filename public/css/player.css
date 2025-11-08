@@ -88,3 +88,24 @@
   transition: width 0.25s linear;
 }
 
+/* Starring actor buttons */
+.player .starring { color: #fff; }
+.player .starring strong { color: #fff; margin-right: 8px; font-weight:600; }
+.player .starring .actor-btn {
+  display: inline-block;
+  margin: 0 6px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.player .starring .actor-btn:hover {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  transform: translateY(-2px);
+}
+

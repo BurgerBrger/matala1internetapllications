@@ -95,6 +95,11 @@ function cardHTML(m) {
     <div class="card" data-id="${m.id}">
       <div class="card-media">
         <img class="card__img" src="${m.image}" alt="${m.name}">
+        ${(() => {
+          // show rating even if it's 0 (0 is a valid grade)
+          const rating = (m.tmdb && (m.tmdb.rating !== undefined ? m.tmdb.rating : null)) ?? (m.tmdbRating !== undefined ? m.tmdbRating : null);
+          return rating !== null && rating !== undefined ? `<span class="rating-badge">${Number(rating).toFixed(1)}</span>` : '';
+        })()}
       </div>
       <div class="card-overlay">
         <div class="overlay-actions">
@@ -214,10 +219,74 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     renderList(all);
     attachSort(all);
+    // populate ratings asynchronously for visible cards (no DB writes)
+    populateRatings();
   } catch (err) {
     console.error("Feed init failed:", err);
   }
 });
+
+// fetch rating for each visible card and inject a badge if found
+async function populateRatings() {
+  try {
+    const root = document.getElementById('feedContainer');
+    if (!root) return;
+    const cards = Array.from(root.querySelectorAll('.card'));
+    const ids = cards.map(c => Number(c.dataset.id)).filter(n => !Number.isNaN(n));
+    if (!ids.length) return;
+    try {
+      const bulk = await fetch('/api/tmdb/contents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+      if (!bulk.ok) throw new Error('bulk rating fetch failed');
+      const data = await bulk.json();
+      const results = data.results || {};
+      for (const card of cards) {
+        const id = String(card.dataset.id);
+        const info = results[id] || results[Number(id)] || null;
+        const rating = info?.rating ?? (info?.tmdbRating ?? null);
+        if (rating !== null && rating !== undefined) {
+          const media = card.querySelector('.card-media');
+          if (media && !media.querySelector('.rating-badge')) {
+            const span = document.createElement('span');
+            span.className = 'rating-badge';
+            span.textContent = Number(rating).toFixed(1);
+            media.appendChild(span);
+          }
+        }
+      }
+    } catch (e) {
+      // fallback to per-item approach if bulk fails
+      console.warn('bulk ratings failed, falling back to per-item', e);
+      // previous per-item implementation
+      const concurrency = 6;
+      let i = 0;
+      async function worker() {
+        while (i < cards.length) {
+          const idx = i++;
+          const card = cards[idx];
+          const id = card.dataset.id;
+          try {
+            const info = await fetchJSON(`/api/tmdb/content/${id}`);
+            const rating = info?.rating ?? null;
+            if (rating !== null && rating !== undefined) {
+              const media = card.querySelector('.card-media');
+              if (media && !media.querySelector('.rating-badge')) {
+                const span = document.createElement('span');
+                span.className = 'rating-badge';
+                span.textContent = Number(rating).toFixed(1);
+                media.appendChild(span);
+              }
+            }
+          } catch (err) { /* ignore */ }
+        }
+      }
+      await Promise.all(Array.from({ length: concurrency }, () => worker()));
+    }
+  } catch (e) { console.error('populateRatings failed', e); }
+}
 
 
 
