@@ -52,6 +52,7 @@
   </div>
 </div>
 
+
 <%
   const isShow  = item && item.type === 'tv' && Array.isArray(item.episodes) && item.episodes.length > 0;
   const _ep     = (typeof epIndex !== 'undefined') ? Number(epIndex) : 0;  // controller may pass epIndex
@@ -63,7 +64,12 @@
 
 
 <!-- 4) PLAYER + (optional) EPISODE LIST -->
-<main id="watch" class="player-wrap container mt-4">
+<main
+  id="watch"
+  class="player-wrap container mt-4"
+  data-isshow="<%= isShow ? 'true' : 'false' %>"
+  data-content-id="<%= item.id %>"
+  data-current-ep="<%= safeIdx %>">
   <div class="row">
     <!-- video column -->
     <div class="<%= isShow ? 'col-lg-9' : 'col-12' %>">
@@ -90,15 +96,19 @@
       <h5 class="mb-3">Episodes</h5>
       <div class="list-group">
         <% item.episodes.forEach((ep, i) => { %>
-          <a 
-            class="list-group-item list-group-item-action <%= i === safeIdx ? 'active' : '' %>"
-            href="/player/<%= item.id %>?ep=<%= i %>">
-            <div class="d-flex w-100 justify-content-between">
-              <strong>Ep <%= ep.id %></strong>
-              <% if (i === safeIdx) { %><span>Now Playing</span><% } %>
-            </div>
-            <small><%= ep.name %></small>
-          </a>
+           <a 
+             class="list-group-item list-group-item-action <%= i === safeIdx ? 'active' : '' %>"
+             href="/player/<%= item.id %>?ep=<%= i %>"
+             data-ep-index="<%= i %>">
+             <div class="d-flex w-100 justify-content-between">
+               <strong>Ep <%= ep.id %></strong>
+               <% if (i === safeIdx) { %><span>Now Playing</span><% } %>
+             </div>
+             <small><%= ep.name %></small>
+             <div class="episode-progress">
+               <div class="episode-progress-inner"></div>
+             </div>
+           </a>
         <% }) %>
       </div>
     </aside>
@@ -106,13 +116,102 @@
   </div>
 </main>
 
+<script>
+(function () {
+  const videoEl = document.getElementById("videoEl");
+  if (!videoEl) return;
 
-  <script>
-    const v = document.getElementById("videoEl");
-    if (v) v.addEventListener("loadedmetadata", () => {
-      if (v.currentTime < 0.1) v.currentTime = 0;
-    });
-  </script>
+  const root = document.getElementById("watch");
+  if (!root) return;
+
+  const isShow = root.dataset.isshow === "true";
+  const contentId = Number(root.dataset.contentId || "0");
+  const currentEpisodeIndex = Number(root.dataset.currentEp || "0");
+
+  const profileId = Number(localStorage.getItem("selectedProfileId") || 0);
+  if (!profileId || !contentId) {
+    // allow watching, but we don't track progress without a profile or content
+    return;
+  }
+
+  let duration = 0;
+  let lastSent = 0;
+
+  // --- load existing progress for this profile + title ---
+  fetch(`/api/watch/${profileId}/content/${contentId}`)
+    .then(r => (r.ok ? r.json() : []))
+    .then(rows => {
+      if (!Array.isArray(rows)) return;
+
+      // 1) paint episode progress bars
+      rows.forEach(row => {
+        if (
+          typeof row.position !== "number" ||
+          typeof row.duration !== "number" ||
+          row.duration <= 0
+        ) {
+          return;
+        }
+
+        const epIdx = Number(row.episodeIndex || 0);
+        const inner = document.querySelector(
+          `.list-group-item[data-ep-index="${epIdx}"] .episode-progress-inner`
+        );
+        if (!inner) return;
+
+        const pct = Math.min(
+          100,
+          Math.max(0, (row.position / row.duration) * 100)
+        );
+        inner.style.width = pct + "%";
+      });
+
+      // 2) resume current ep / movie
+      const current = rows.find(
+        r => Number(r.episodeIndex) === currentEpisodeIndex
+      );
+      if (current && typeof current.position === "number" && current.position > 1) {
+        videoEl.currentTime = current.position;
+      }
+    })
+    .catch(err => console.error("load watch progress failed", err));
+
+  // track duration once metadata is ready
+  videoEl.addEventListener("loadedmetadata", () => {
+    duration = videoEl.duration || 0;
+  });
+
+  function sendProgress(completed) {
+    fetch("/api/watch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        profileId,
+        contentId,
+        episodeIndex: currentEpisodeIndex,
+        position: videoEl.currentTime || 0,
+        duration: duration || videoEl.duration || 0,
+        completed: !!completed
+      })
+    }).catch(err => console.error("save watch progress failed", err));
+  }
+
+  // save roughly every 5 seconds
+  videoEl.addEventListener("timeupdate", () => {
+    const now = videoEl.currentTime || 0;
+    if (now - lastSent > 5) {
+      lastSent = now;
+      sendProgress(false);
+    }
+  });
+
+  videoEl.addEventListener("pause", () => sendProgress(false));
+  videoEl.addEventListener("ended", () => sendProgress(true));
+})();
+</script>
+
+
+
 
 </body>
 </html>
