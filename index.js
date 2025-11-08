@@ -1,5 +1,9 @@
 // index.js
 require("dotenv").config();
+// log process-level events so we can diagnose unexpected exits
+process.on('exit', (code) => console.log('process exit event, code=', code));
+process.on('uncaughtException', (err) => { console.error('uncaughtException', err && err.stack ? err.stack : err); });
+process.on('unhandledRejection', (reason) => { console.error('unhandledRejection', reason); });
 const path = require("path");
 const express = require("express");
 const { connectDB } = require("./db");

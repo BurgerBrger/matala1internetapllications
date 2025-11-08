@@ -20,20 +20,8 @@ async function fetchJSON(url, opts) {
 async function loadProfiles() {
   PROFILES = await fetchJSON("/api/profiles");
 
-  const hasAdmin = PROFILES.some(p => Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin");
-  if (!hasAdmin) {
-    PROFILES.unshift({
-      id: 0,
-      name: "Admin",
-      image: "/images/profile/admin.jpg",
-      liked: [],
-      watched: [],
-      topGenres: []
-    });
-  }
-  // Admin first, then by id
   // do not inject a fake Admin card here; server should return only allowed profiles
-  // sort by id (admin/profile ordering should be controlled server-side)
+  // Admin ordering should be controlled server-side; just sort by id here
   PROFILES.sort((a, b) => Number(a.id) - Number(b.id));
 }
 
