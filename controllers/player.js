@@ -16,8 +16,19 @@ exports.render = async (req, res, next) => {
       return res.status(404).send("Not found");
     }
 
+    let similar = [];
+    const genres = item.genre || [];
+    if (genres.length) {
+      similar = await Content.find({
+        id: { $ne: item.id },
+        genre: { $in: genres }
+      })
+        .limit(12)       // at most 12 items
+        .lean();
+    }
+
     const epIndex = Number(req.query.ep || 0) || 0; // for TV shows
-    return res.render("player", { item, epIndex });
+    return res.render("player", { item, epIndex, similar });
   } catch (err) {
     console.error("PLAYER RENDER ERROR:", err);
     return next(err);

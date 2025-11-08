@@ -98,3 +98,25 @@ exports.saveProgress = async (req, res, next) => {
     next(e);
   }
 };
+
+// DELETE /api/watch/:profileId/content/:contentId
+// remove all watchProgress rows for this profile+title and unmark "watched"
+exports.clearForContent = async (req, res, next) => {
+  try {
+    const profileId = Number(req.params.profileId);
+    const contentId = Number(req.params.contentId);
+    if (!profileId || !contentId) return res.status(400).json({ error: "bad params" });
+
+    const result = await Profile.updateOne(
+      { id: profileId },
+      {
+        $pull: { watchProgress: { contentId } },
+        $pullAll: { watched: [contentId] }
+      }
+    );
+    res.json({ ok: true, result });
+  } catch (e) {
+    next(e);
+  }
+};
+

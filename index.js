@@ -86,6 +86,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).send("Server error");
 });
 
+
 // start server only after DB connects
 (async () => {
   await connectDB(process.env.MONGODB_URI);
