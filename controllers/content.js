@@ -1,12 +1,51 @@
 // controllers/content.js
 const Content = require("../models/mongo/Content");
 const Profile = require("../models/mongo/Profile");
+const tmdb = require("../lib/tmdb");
+
+// helper: update content doc with TMDB info (search by title/year when needed)
+async function ensureTmdbRating(doc) {
+  try {
+    if (!doc) return null;
+    // if we already have a cached rating, return it
+    if (doc.tmdbRating !== undefined && doc.tmdbRating !== null) {
+      return { tmdbId: doc.tmdbId, rating: doc.tmdbRating, votes: doc.tmdbVoteCount };
+    }
+    // try to find via title/year
+    const info = await tmdb.findRating(doc.type === 'tv' ? 'tv' : 'movie', doc.name, doc.year);
+    if (!info) return null;
+    // persist to DB
+    await Content.updateOne({ _id: doc._id }, { $set: { tmdbId: info.tmdbId, tmdbRating: info.rating, tmdbVoteCount: info.votes, tmdbLastUpdated: new Date() } });
+    return { tmdbId: info.tmdbId, rating: info.rating, votes: info.votes };
+  } catch (e) {
+    console.error('ensureTmdbRating error', e && e.message ? e.message : e);
+    return null;
+  }
+}
 
 // GET /api/content
 exports.getAllContents = async (req, res, next) => {
   try {
     const list = await Content.find({}).sort({ id: 1 }).lean();
-    res.json(list);
+    // attach cached tmdbRating if available, and start background fetches for missing ratings
+    const missing = [];
+    const out = list.map(doc => {
+      const copy = Object.assign({}, doc);
+      if (doc.tmdbRating !== undefined && doc.tmdbRating !== null) {
+        copy.tmdb = { id: doc.tmdbId, rating: doc.tmdbRating, votes: doc.tmdbVoteCount };
+      } else {
+        copy.tmdb = null;
+        missing.push(copy);
+      }
+      return copy;
+    });
+    // background fill missing ratings (no await)
+    (async () => {
+      for (const d of missing) {
+        try { await ensureTmdbRating(d); } catch (e) { /* ignore */ }
+      }
+    })();
+    res.json(out);
   } catch (e) { next(e); }
 };
 
@@ -30,8 +69,12 @@ exports.getRandomContent = async (_req, res, next) => {
 // GET /api/content/:id
 exports.getContentById = async (req, res, next) => {
   try {
-    const item = await Content.findOne({ id: Number(req.params.id) }).lean();
+    let item = await Content.findOne({ id: Number(req.params.id) }).lean();
     if (!item) return res.status(404).json({ error: "Not found" });
+    // ensure rating (synchronously for single item)
+    const tm = await ensureTmdbRating(item);
+    if (tm) item = Object.assign({}, item, { tmdb: { id: tm.tmdbId, rating: tm.rating, votes: tm.votes } });
+    else item = Object.assign({}, item, { tmdb: item.tmdbRating ? { id: item.tmdbId, rating: item.tmdbRating, votes: item.tmdbVoteCount } : null });
     res.json(item);
   } catch (e) { next(e); }
 };

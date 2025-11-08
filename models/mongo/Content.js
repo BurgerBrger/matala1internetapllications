@@ -12,6 +12,11 @@ const ContentSchema = new mongoose.Schema(
     image: String,      // poster (card)
     wideimage: String,  // hero wide image
     video: String,      // mp4 path (used for movies)
+  // TMDB integration: optional TMDB id and cached rating
+  tmdbId: Number,
+  tmdbRating: Number,
+  tmdbVoteCount: Number,
+  tmdbLastUpdated: Date,
     episodes: {         // used for TV shows only
       type: [{
         id:   { type: Number, required: true },   // per-show episode id (e.g., 1,2,3…)

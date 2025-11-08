@@ -45,6 +45,7 @@ app.get("/", (_req, res) => res.redirect("/signin"));
 app.use("/api/content", require("./routes/api/content"));
 app.use("/api/profiles", require("./routes/api/profiles"));
 app.use("/api/watch", require("./routes/api/watch"));
+app.use('/api/tmdb', require('./routes/api/tmdb'));
 
 const User = require('./models/mongo/users');
 
@@ -71,6 +72,12 @@ app.post('/logout', (req, res) => {
   } else res.json({ ok: true });
 });
 
+
+// debug: log each unmatched request path (temporary)
+app.use((req, res, next) => {
+  console.log('[REQ]', req.method, req.path);
+  next();
+});
 
 // 404 + error handler
 app.use((req, res) => res.status(404).send("Not found"));
