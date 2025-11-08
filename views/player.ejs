@@ -43,9 +43,10 @@
           <% }) %>
         </div>
 
-        <div class="buttons">
-          <a href="#watch" class="btn primary">Watch Now</a>
-          <a href="/feed" class="btn secondary">Back to feed</a>
+        <div class="mt-3 d-flex gap-2">
+            <button id="primaryAction" class="btn btn-danger px-4">Start watching</button>
+            <button id="secondaryAction" class="btn btn-secondary px-4">Start over</button>
+            <a href="/feed" class="btn btn-secondary px-4">Return to feed</a>
         </div>
       </div>
     </div>
@@ -65,11 +66,12 @@
 
 <!-- 4) PLAYER + (optional) EPISODE LIST -->
 <main
-  id="watch"
-  class="player-wrap container mt-4"
-  data-isshow="<%= isShow ? 'true' : 'false' %>"
-  data-content-id="<%= item.id %>"
-  data-current-ep="<%= safeIdx %>">
+   id="watch"
+   class="player-wrap container mt-4"
+   data-isshow="<%= isShow ? 'true' : 'false' %>"
+   data-content-id="<%= item.id %>"
+   data-current-ep="<%= isShow ? safeIdx : 0 %>"
+   data-episodes-count="<%= isShow && item.episodes ? item.episodes.length : 0 %>">
   <div class="row">
     <!-- video column -->
     <div class="<%= isShow ? 'col-lg-9' : 'col-12' %>">
@@ -116,102 +118,220 @@
   </div>
 </main>
 
+  <!-- Similar content -->
+  <section class="container mt-5">
+    <h4 class="mb-3">Similar content</h4>
+
+    <% if (typeof similar !== 'undefined' && similar && similar.length) { %>
+      <div class="feed-row">
+        <% similar.forEach(function(c) { %>
+          <div class="similar-card" data-id="<%= c.id %>">
+            <div class="similar-card-media">
+              <a href="/player/<%= c.id %>">
+                <img class="similar-card_img" src="<%= c.image %>" alt="<%= c.name %>">
+              </a>
+
+              <!-- same overlay style as feed, but without like button -->
+              <div class="similar-card-overlay">
+                <div class="overlay-bottom">
+                  <% if (c.year) { %>
+                    <span class="content-year"><%= c.year %></span>
+                  <% } %>
+                  <div class="content-title"><%= c.name %></div>
+                  <div class="content-genres">
+                    <%= (c.genre || []).join(", ") %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted">No similar titles yet.</p>
+    <% } %>
+  </section>
+
+
 <script>
 (function () {
   const videoEl = document.getElementById("videoEl");
-  if (!videoEl) return;
-
   const root = document.getElementById("watch");
   if (!root) return;
 
   const isShow = root.dataset.isshow === "true";
   const contentId = Number(root.dataset.contentId || "0");
   const currentEpisodeIndex = Number(root.dataset.currentEp || "0");
+  const episodesCount = Number(root.dataset.episodesCount || "0");
 
-  const profileId = Number(localStorage.getItem("selectedProfileId") || 0);
-  if (!profileId || !contentId) {
-    // allow watching, but we don't track progress without a profile or content
-    return;
-  }
+  const profileId = Number(localStorage.getItem("selectedProfileId") || "0");
+
+  const primaryBtn   = document.getElementById("primaryAction");
+  const secondaryBtn = document.getElementById("secondaryAction");
 
   let duration = 0;
   let lastSent = 0;
+  let rowsCache = []; // rows from /api/watch
 
-  // --- load existing progress for this profile + title ---
-  fetch(`/api/watch/${profileId}/content/${contentId}`)
-    .then(r => (r.ok ? r.json() : []))
-    .then(rows => {
-      if (!Array.isArray(rows)) return;
-
-      // 1) paint episode progress bars
-      rows.forEach(row => {
-        if (
-          typeof row.position !== "number" ||
-          typeof row.duration !== "number" ||
-          row.duration <= 0
-        ) {
-          return;
-        }
-
-        const epIdx = Number(row.episodeIndex || 0);
-        const inner = document.querySelector(
-          `.list-group-item[data-ep-index="${epIdx}"] .episode-progress-inner`
-        );
-        if (!inner) return;
-
-        const pct = Math.min(
-          100,
-          Math.max(0, (row.position / row.duration) * 100)
-        );
-        inner.style.width = pct + "%";
-      });
-
-      // 2) resume current ep / movie
-      const current = rows.find(
-        r => Number(r.episodeIndex) === currentEpisodeIndex
-      );
-      if (current && typeof current.position === "number" && current.position > 1) {
-        videoEl.currentTime = current.position;
-      }
-    })
-    .catch(err => console.error("load watch progress failed", err));
-
-  // track duration once metadata is ready
-  videoEl.addEventListener("loadedmetadata", () => {
-    duration = videoEl.duration || 0;
-  });
-
-  function sendProgress(completed) {
-    fetch("/api/watch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        profileId,
-        contentId,
-        episodeIndex: currentEpisodeIndex,
-        position: videoEl.currentTime || 0,
-        duration: duration || videoEl.duration || 0,
-        completed: !!completed
-      })
-    }).catch(err => console.error("save watch progress failed", err));
+  function paintEpisodeBars(rows) {
+    rows.forEach(row => {
+      if (!isFinite(row.position) || !isFinite(row.duration) || row.duration <= 0) return;
+      const pct = Math.min(100, Math.max(0, (row.position / row.duration) * 100));
+      const sel = `.list-group-item[data-ep-index="${Number(row.episodeIndex || 0)}"] .episode-progress-inner`;
+      const inner = document.querySelector(sel);
+      if (inner) inner.style.width = pct + "%";
+    });
   }
 
-  // save roughly every 5 seconds
-  videoEl.addEventListener("timeupdate", () => {
-    const now = videoEl.currentTime || 0;
-    if (now - lastSent > 5) {
-      lastSent = now;
-      sendProgress(false);
-    }
-  });
+  // compute state & actions
+  function computeState() {
+    if (!rowsCache.length) return { state: "fresh" };
 
-  videoEl.addEventListener("pause", () => sendProgress(false));
-  videoEl.addEventListener("ended", () => sendProgress(true));
+    if (!isShow) {
+      const r = rowsCache.find(r => Number(r.episodeIndex) === 0) || rowsCache[0];
+      if (r && r.completed) return { state: "finished" };
+      return { state: "in_progress", movieRow: r };
+    }
+
+    // show
+    const lastIdx = episodesCount - 1;
+    const byEp = new Map();
+    rowsCache.forEach(r => byEp.set(Number(r.episodeIndex || 0), r));
+
+    // finished if every episode has completed=true
+    let allDone = episodesCount > 0;
+    for (let i = 0; i < episodesCount; i++) {
+      const r = byEp.get(i);
+      if (!r || !r.completed) { allDone = false; break; }
+    }
+    if (allDone) return { state: "finished" };
+
+    // continue: prefer the first episode that is not completed but has progress,
+    // otherwise the next episode after the highest completed.
+    let firstInProgress = null;
+    let highestCompleted = -1;
+    for (let i = 0; i < episodesCount; i++) {
+      const r = byEp.get(i);
+      if (r && r.completed) highestCompleted = Math.max(highestCompleted, i);
+      if (!firstInProgress && r && !r.completed && r.position > 1) {
+        firstInProgress = i;
+      }
+    }
+    if (firstInProgress !== null) return { state: "in_progress", resumeEp: firstInProgress };
+
+    const nextEp = Math.max(0, highestCompleted + 1);
+    return { state: "in_progress", resumeEp: Math.min(nextEp, lastIdx) };
+  }
+
+  function applyCTA() {
+    const { state, movieRow, resumeEp } = computeState();
+
+    if (state === "fresh") {
+      primaryBtn.textContent = "Start watching";
+      secondaryBtn.classList.add("d-none");
+      primaryBtn.onclick = () => {
+        if (isShow) {
+          window.location.href = `/player/${contentId}?ep=0`;
+        } else if (videoEl) {
+          videoEl.currentTime = 0;
+          videoEl.play();
+        }
+      };
+      return;
+    }
+
+    if (state === "in_progress") {
+      primaryBtn.textContent = "Continue watching";
+      secondaryBtn.textContent = "Start over";
+      secondaryBtn.classList.remove("d-none");
+
+      primaryBtn.onclick = () => {
+        if (isShow) {
+          const target = (typeof resumeEp === "number") ? resumeEp : 0;
+          if (target !== currentEpisodeIndex) {
+            window.location.href = `/player/${contentId}?ep=${target}`;
+          } else if (videoEl) {
+            // resume within current episode
+            const row = rowsCache.find(r => Number(r.episodeIndex) === target);
+            if (row && row.position > 1) videoEl.currentTime = row.position;
+            videoEl.play();
+          }
+        } else if (videoEl) {
+          const pos = movieRow && movieRow.position > 1 ? movieRow.position : 0;
+          videoEl.currentTime = pos;
+          videoEl.play();
+        }
+      };
+
+      secondaryBtn.onclick = async () => {
+        try {
+          await fetch(`/api/watch/${profileId}/content/${contentId}`, { method: "DELETE" });
+          // start from episode 1 / beginning
+          if (isShow) window.location.href = `/player/${contentId}?ep=0`;
+          else if (videoEl) { videoEl.currentTime = 0; videoEl.play(); }
+        } catch (e) { console.error("clear progress failed", e); }
+      };
+      return;
+    }
+
+    if (state === "finished") {
+      primaryBtn.textContent = "Watch again";
+      secondaryBtn.classList.add("d-none");
+      primaryBtn.onclick = () => {
+        if (isShow) window.location.href = `/player/${contentId}?ep=0`;
+        else if (videoEl) { videoEl.currentTime = 0; videoEl.play(); }
+      };
+    }
+  }
+
+  // --- load rows, paint bars, resume if needed, update CTAs
+  if (profileId && contentId) {
+    fetch(`/api/watch/${profileId}/content/${contentId}`)
+      .then(r => (r.ok ? r.json() : []))
+      .then(rows => {
+        rowsCache = Array.isArray(rows) ? rows : [];
+        paintEpisodeBars(rowsCache);
+
+        // resume current episode/movie if we are already on its page
+        if (videoEl) {
+          const row = rowsCache.find(r => Number(r.episodeIndex) === currentEpisodeIndex);
+          if (row && row.position > 1) videoEl.currentTime = row.position;
+        }
+        applyCTA();
+      })
+      .catch(err => { console.error("load progress failed", err); applyCTA(); });
+  } else {
+    applyCTA();
+  }
+
+  // --- save progress to Mongo while watching ---
+  if (videoEl && profileId && contentId) {
+    videoEl.addEventListener("loadedmetadata", () => { duration = videoEl.duration || 0; });
+
+    function sendProgress(completed) {
+      fetch("/api/watch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profileId,
+          contentId,
+          episodeIndex: currentEpisodeIndex,
+          position: videoEl.currentTime || 0,
+          duration: duration || videoEl.duration || 0,
+          completed: !!completed
+        })
+      }).catch(e => console.error("save progress failed", e));
+    }
+
+    videoEl.addEventListener("timeupdate", () => {
+      const now = videoEl.currentTime || 0;
+      if (now - lastSent > 5) { lastSent = now; sendProgress(false); }
+    });
+    videoEl.addEventListener("pause", () => sendProgress(false));
+    videoEl.addEventListener("ended", () => sendProgress(true));
+  }
 })();
 </script>
-
-
-
 
 </body>
 </html>
