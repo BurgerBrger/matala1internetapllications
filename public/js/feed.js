@@ -487,40 +487,72 @@ function attachPopular(_content) {
   // Modes cycle: 'top5' -> 'movies' -> 'all' -> back to 'top5'
   btn.dataset.mode = btn.dataset.mode || 'top5';
 
-  btn.addEventListener('click', () => {
-    const serverList = Array.isArray(window.__SERVER_FEED_CONTENT__) ? window.__SERVER_FEED_CONTENT__ : [];
-    const source = (serverList.length ? serverList : (window.__ALL_CONTENT__ || [])).slice();
+  btn.addEventListener('click', async () => {
+    // On click, request grouped top-5 per type from server using aggregation
+    // endpoint and render grouped sections. Subsequent clicks will cycle
+    // through the same grouped view (keeps behavior predictable).
+    try {
+      btn.disabled = true;
+      btn.classList.add('loading');
+      const res = await fetch('/api/content?groupby=typeTop');
+      if (!res.ok) throw new Error(`/api/content?groupby=typeTop -> ${res.status}`);
+      const groups = await res.json();
 
-    const mode = btn.dataset.mode || 'top5';
-    if (mode === 'top5') {
-      // show top-5 (mixed movies + tv) by likes
-      source.sort((a, b) => likesOf(b) - likesOf(a));
-      const top5 = source.slice(0, 5);
-      renderList(top5);
-      if (top5.length) setHero(top5[0]);
-      btn.dataset.mode = 'movies';
-      btn.textContent = 'Popular: Movies';
-    } else if (mode === 'movies') {
-      // show ALL movies (sorted by likes desc)
-      const movies = source.filter(m => (m.type || '').toLowerCase() === 'movie');
-      movies.sort((a, b) => likesOf(b) - likesOf(a));
-      renderList(movies);
-      if (movies.length) setHero(movies[0]);
-      btn.dataset.mode = 'all';
-      btn.textContent = 'Popular: All';
-    } else {
-      // show full catalog (restore client view)
-      const all = window.__ALL_CONTENT__ || [];
-      renderList(all);
-      if (all.length) setHero(all[0]);
-      btn.dataset.mode = 'top5';
-      btn.textContent = 'Popular';
+      // groups is an array: [{ type: 'movie', items: [...] }, { type: 'tv', items: [...] }]
+      renderGroupedPopular(groups);
+      // set hero to the first available item from the first group
+      const first = (groups[0] && groups[0].items && groups[0].items[0]) || null;
+      if (first) setHero(first);
+    } catch (err) {
+      console.error('Popular group fetch failed', err);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
     }
-
-    // brief active styling
-    btn.classList.add('active');
-    setTimeout(() => btn.classList.remove('active'), 900);
   });
+}
+
+// Render grouped popular results: show a heading per type and cards for that type
+function renderGroupedPopular(groups) {
+  const root = document.getElementById('feedContainer');
+  if (!root) return;
+  // Accept two response shapes:
+  // 1) grouped: [{ type: 'movie', items: [...] }, ...]
+  // 2) flat list: [{ id, type, ... }, ...] -> group client-side
+  let normalized = [];
+  if (!Array.isArray(groups)) groups = [];
+  // detect flat list (elements look like content docs: have id and type but no items)
+  const looksLikeFlat = groups.length && groups.every(g => (g.id || g._id) && g.type && !g.items);
+  if (looksLikeFlat) {
+    const map = {};
+    for (const doc of groups) {
+      const t = (doc.type || 'unknown');
+      if (!map[t]) map[t] = [];
+      map[t].push(doc);
+    }
+    for (const t of Object.keys(map)) {
+      normalized.push({ type: t, items: map[t].slice(0, 5) });
+    }
+  } else {
+    // assume grouped shape or defensively map
+    normalized = groups.map(g => ({ type: g.type || 'unknown', items: Array.isArray(g.items) ? g.items : [] }));
+  }
+
+  // produce HTML: for each normalized group, show a header and its cards
+  const parts = [];
+  for (const g of normalized) {
+    const t = (g.type || 'unknown').toUpperCase();
+    const items = Array.isArray(g.items) ? g.items : [];
+    const cards = items.map(cardHTML).join('');
+    parts.push(`<section class="popular-group"><h2 class="group-title">${t} (${items.length})</h2><div class="group-row">${cards}</div></section>`);
+  }
+  root.innerHTML = parts.join('');
+
+  // restore liked-state on newly rendered buttons
+  for (const btn of root.querySelectorAll('.like-btn')) {
+    const id = btn.dataset.id;
+    if (likedSet.has(String(id))) btn.classList.add('liked');
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
