@@ -29,7 +29,7 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: { httpOnly: true, maxAge: 1000*60*60*24 }
-}));
+})); 
 
 // page routes
 app.use("/signin", require("./routes/pages/signin"));
@@ -48,7 +48,7 @@ app.use("/api/watch", require("./routes/api/watch"));
 app.use('/api/tmdb', require('./routes/api/tmdb'));
 
 const User = require('./models/mongo/users');
-
+ 
 // GET /api/me - return basic session user info
 app.get('/api/me', async (req, res) => {
   try {
