@@ -414,6 +414,39 @@ document.addEventListener("click", (e) => {
   }
 });
 
+// quick reset button: clear search, filters and sorts
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#resetFiltersBtn");
+  if (!btn) return;
+
+  // clear search
+  const si = document.getElementById("searchInput");
+  if (si) si.value = "";
+
+  // clear genre & status filters
+  activeGenreFilters = new Set();
+  activeStatusFilters.clear();
+  document.querySelectorAll('.filter-status').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.genre-option').forEach(b => b.classList.remove('active'));
+
+  // close panel if open
+  const panel = document.getElementById('genreFilterPanel');
+  if (panel) panel.classList.remove('open');
+
+  // reset sort modes
+  currentSortMode = null;
+  currentSortAsc = true;
+  currentSortGradeDesc = true;
+  const sortBtn = document.getElementById('sortBtn');
+  if (sortBtn) sortBtn.textContent = 'Sort A–Z';
+  const gradeBtn = document.getElementById('sortByGradeBtn');
+  if (gradeBtn) gradeBtn.textContent = 'Sort by grade ↓';
+  const popBtn = document.getElementById('popularBtn');
+  if (popBtn) popBtn.classList.remove('active');
+
+  applyFiltersAndRender();
+});
+
 function attachSort(_content) {
   const btn = document.getElementById("sortBtn");
   if (!btn) return;
@@ -444,6 +477,49 @@ function attachSortByGrade(_content) {
     currentSortGradeDesc = !currentSortGradeDesc;
     btn.textContent = currentSortGradeDesc ? 'Sort by grade ↓' : 'Sort by grade ↑';
     applyFiltersAndRender();
+  });
+}
+
+function attachPopular(_content) {
+  const btn = document.getElementById('popularBtn');
+  if (!btn) return;
+
+  // Modes cycle: 'top5' -> 'movies' -> 'all' -> back to 'top5'
+  btn.dataset.mode = btn.dataset.mode || 'top5';
+
+  btn.addEventListener('click', () => {
+    const serverList = Array.isArray(window.__SERVER_FEED_CONTENT__) ? window.__SERVER_FEED_CONTENT__ : [];
+    const source = (serverList.length ? serverList : (window.__ALL_CONTENT__ || [])).slice();
+
+    const mode = btn.dataset.mode || 'top5';
+    if (mode === 'top5') {
+      // show top-5 (mixed movies + tv) by likes
+      source.sort((a, b) => likesOf(b) - likesOf(a));
+      const top5 = source.slice(0, 5);
+      renderList(top5);
+      if (top5.length) setHero(top5[0]);
+      btn.dataset.mode = 'movies';
+      btn.textContent = 'Popular: Movies';
+    } else if (mode === 'movies') {
+      // show ALL movies (sorted by likes desc)
+      const movies = source.filter(m => (m.type || '').toLowerCase() === 'movie');
+      movies.sort((a, b) => likesOf(b) - likesOf(a));
+      renderList(movies);
+      if (movies.length) setHero(movies[0]);
+      btn.dataset.mode = 'all';
+      btn.textContent = 'Popular: All';
+    } else {
+      // show full catalog (restore client view)
+      const all = window.__ALL_CONTENT__ || [];
+      renderList(all);
+      if (all.length) setHero(all[0]);
+      btn.dataset.mode = 'top5';
+      btn.textContent = 'Popular';
+    }
+
+    // brief active styling
+    btn.classList.add('active');
+    setTimeout(() => btn.classList.remove('active'), 900);
   });
 }
 
@@ -497,8 +573,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     buildGenreFilterOptions(all);
 
     applyFiltersAndRender();
-    attachSort(all);
-    attachSortByGrade(all);
+  attachSort(all);
+  attachSortByGrade(all);
+  attachPopular(all);
     populateRatings();
   } catch (err) {
     console.error("Feed init failed:", err);
