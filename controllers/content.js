@@ -26,6 +26,17 @@ async function ensureTmdbRating(doc) {
 // GET /api/content
 exports.getAllContents = async (req, res, next) => {
   try {
+    // support grouped top-N per type (e.g. ?groupby=typeTop)
+    if (req.query && req.query.groupby === 'typeTop') {
+      // aggregate top 5 by numberOfLikes per type (movie, tv, etc.)
+      const agg = await Content.aggregate([
+        { $sort: { numberOfLikes: -1 } },
+        { $group: { _id: "$type", items: { $push: "$$ROOT" } } },
+        { $project: { _id: 0, type: "$_id", items: { $slice: ["$items", 5] } } }
+      ]).exec();
+      return res.json(agg);
+    }
+
     const list = await Content.find({}).sort({ id: 1 }).lean();
     // attach cached tmdbRating if available, and start background fetches for missing ratings
     const missing = [];

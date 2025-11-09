@@ -519,6 +519,24 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   z-index: 5;
 }
 
+/* Grouped Popular results */
+.popular-group {
+  margin: 18px 0 36px 0;
+}
+.popular-group .group-title {
+  color: #fff;
+  font-size: 20px;
+  margin: 0 0 12px 12px;
+  letter-spacing: 1px;
+}
+.popular-group .group-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 0 12px 12px 12px;
+}
+
 
 .rating-badge {
   position: static;
