@@ -16,6 +16,16 @@
   <!-- Spacer to push content below fixed navbar (if your navbar is fixed) -->
   <div class="topSpacer"></div>
 
+  <%
+    // Precompute show/episode context BEFORE any usage below
+    const isShow  = item && item.type === 'tv' && Array.isArray(item.episodes) && item.episodes.length > 0;
+    const _ep     = (typeof epIndex !== 'undefined') ? Number(epIndex) : 0;  // controller may pass epIndex
+    const epIdx   = Number.isFinite(_ep) ? _ep : 0;
+    const safeIdx = isShow ? Math.max(0, Math.min(epIdx, item.episodes.length - 1)) : 0;
+    const current = isShow ? item.episodes[safeIdx] : null;
+    const src     = isShow ? (current && current.video) : ((item && (item.trailer || item.video)) || "");
+  %>
+
   <!-- 2) HERO with wide image -->
    <!-- HERO like the feed -->
 <div class="topContent">
@@ -63,6 +73,10 @@
             <button id="secondaryAction" class="btn btn-secondary px-4">Start over</button>
             <a href="/feed" class="btn btn-secondary px-4">Return to feed</a>
             <button id="overviewToggle" class="btn btn-secondary px-3">Overview</button>
+            <!-- Next Episode button: only shown for TV shows and when a next episode exists -->
+            <% if (isShow && safeIdx < item.episodes.length - 1) { %>
+              <button id="nextEpisodeBtn" class="btn btn-outline-light px-3">Next Episode ▶</button>
+            <% } %>
         </div>
 
         <!-- Server-rendered overview container, toggled by the Overview button -->
@@ -76,14 +90,7 @@
 </div>
 
 
-<%
-  const isShow  = item && item.type === 'tv' && Array.isArray(item.episodes) && item.episodes.length > 0;
-  const _ep     = (typeof epIndex !== 'undefined') ? Number(epIndex) : 0;  // controller may pass epIndex
-  const epIdx   = Number.isFinite(_ep) ? _ep : 0;
-  const safeIdx = isShow ? Math.max(0, Math.min(epIdx, item.episodes.length - 1)) : 0;
-  const current = isShow ? item.episodes[safeIdx] : null;
-  const src     = isShow ? (current && current.video) : ((item && (item.trailer || item.video)) || "");
-%>
+ 
 
 
 <!-- 4) PLAYER + (optional) EPISODE LIST -->
@@ -203,6 +210,18 @@
   const currentEpisodeIndex = Number(root.dataset.currentEp || "0");
   const episodesCount = Number(root.dataset.episodesCount || "0");
 
+  // Simple direct Next Episode navigation (in addition to CTA logic). Ensures click always advances.
+  const nextBtnDirect = document.getElementById('nextEpisodeBtn');
+  if (nextBtnDirect) {
+    nextBtnDirect.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentEpisodeIndex < episodesCount - 1) {
+        const target = currentEpisodeIndex + 1;
+        window.location.href = `/player/${contentId}?ep=${target}`;
+      }
+    });
+  }
+
   const profileId = Number(localStorage.getItem("selectedProfileId") || "0");
 
   const primaryBtn   = document.getElementById("primaryAction");
@@ -320,6 +339,20 @@
         if (isShow) window.location.href = `/player/${contentId}?ep=0`;
         else if (videoEl) { videoEl.currentTime = 0; videoEl.play(); }
       };
+    }
+
+    // Next Episode button logic (TV only)
+    const nextBtn = document.getElementById('nextEpisodeBtn');
+    if (nextBtn) {
+      if (isShow && currentEpisodeIndex < episodesCount - 1) {
+        nextBtn.classList.remove('d-none');
+        const target = currentEpisodeIndex + 1;
+        nextBtn.onclick = () => {
+          window.location.href = `/player/${contentId}?ep=${target}`;
+        };
+      } else {
+        nextBtn.classList.add('d-none');
+      }
     }
   }
 
