@@ -608,6 +608,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   attachSort(all);
   attachSortByGrade(all);
   attachPopular(all);
+  attachRecommendation(all);
     populateRatings();
   } catch (err) {
     console.error("Feed init failed:", err);
@@ -677,6 +678,55 @@ async function populateRatings() {
   } catch (e) { console.error('populateRatings failed', e); }
 }
 
+
+function attachRecommendation(_content) {
+  const btn = document.getElementById('recommendBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const pid = getSelectedProfileId();
+    if (!pid) {
+      alert('Select a profile to get recommendations');
+      return;
+    }
+
+    // load stored genre stats (per-profile) and pick top genres
+    const stats = loadGenreStats();
+    const genreScores = Object.entries(stats || {}).map(([g, v]) => ({ genre: g, score: (v.liked || 0) + (v.watched || 0) }));
+    genreScores.sort((a, b) => b.score - a.score);
+
+    let preferredGenres = genreScores.slice(0, 3).map(x => x.genre);
+    if (!preferredGenres.length) {
+      // fallback: use most common genres from all content
+      const all = window.__ALL_CONTENT__ || [];
+      const freq = {};
+      all.forEach(m => (m.genre || []).forEach(g => freq[g] = (freq[g] || 0) + 1));
+      preferredGenres = Object.keys(freq).sort((a, b) => freq[b] - freq[a]).slice(0, 3);
+    }
+
+    // choose matching content and rank by likes then rating
+    const all = window.__ALL_CONTENT__ || [];
+    const candidates = all.filter(m => (m.genre || []).some(g => preferredGenres.includes(g)));
+    candidates.sort((a, b) => {
+      const la = likesOf(a), lb = likesOf(b);
+      if (lb !== la) return lb - la;
+      const ra = ratingValue(a), rb = ratingValue(b);
+      return rb - ra;
+    });
+
+    const top = candidates.slice(0, 5);
+    if (top.length === 0) {
+      alert('No recommendations found. Try interacting more (like items) to improve recommendations.');
+      return;
+    }
+
+    renderList(top);
+    setHero(top[0]);
+
+    btn.classList.add('active');
+    setTimeout(() => btn.classList.remove('active'), 900);
+  });
+}
 
 
 document.getElementById("feedContainer").addEventListener("click", (e) => {
