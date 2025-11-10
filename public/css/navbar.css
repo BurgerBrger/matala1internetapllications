@@ -95,6 +95,26 @@ body {
   color: var(--main-color);
 }
 
+/* Switch Profile button */
+.switch-profile-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: lightgray;
+  border-radius: 18px;
+  padding: 6px 10px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.switch-profile-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border-color: rgba(255,255,255,0.4);
+}
+
 .search-box {
   display: flex;
   align-items: center;

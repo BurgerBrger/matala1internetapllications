@@ -13,6 +13,18 @@ document.addEventListener("click", (e) => {
     .catch(() => { localStorage.clear(); window.location.href = '/signin'; });
 });
 
+// Switch profile button: navigate to profile selection page
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#switchProfileBtn");
+  if (!btn) return;
+  e.preventDefault();
+  // Clear only current profile selection so user is forced to pick again.
+  localStorage.removeItem('selectedProfileId');
+  localStorage.removeItem('selectedProfileName');
+  // Correct destination: server mounts profile page at /profile
+  window.location.href = '/profile';
+});
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
