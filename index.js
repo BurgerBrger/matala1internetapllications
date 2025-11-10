@@ -37,6 +37,7 @@ app.use("/feed", require("./routes/pages/feed"));
 app.use("/profile", require("./routes/pages/profilepage"));
 app.use("/player", require("./routes/pages/player"));
 app.use("/admin/content", require("./routes/pages/adminContent"));
+app.use("/mygraphs", require("./routes/pages/mygraphs"));
 
 // health
 app.get("/", (_req, res) => res.redirect("/signin"));
@@ -46,6 +47,7 @@ app.use("/api/content", require("./routes/api/content"));
 app.use("/api/profiles", require("./routes/api/profiles"));
 app.use("/api/watch", require("./routes/api/watch"));
 app.use('/api/tmdb', require('./routes/api/tmdb'));
+app.use('/api/stats', require('./routes/api/stats'));
 
 const User = require('./models/mongo/users');
  
