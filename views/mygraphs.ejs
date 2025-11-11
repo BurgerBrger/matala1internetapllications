@@ -4,34 +4,61 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Graphs</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/navbar.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"/>
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <link rel="stylesheet" href="/css/stats.css">
+
+
 </head>
+
 <body>
   <%- include('partial/navbar.ejs') %>
 
-  <main class="container" style="padding-top:80px">
-    <h1 class="mb-4">My Graphs</h1>
+  <main class="container">
+    <h1 class="mb-2">My Graphs</h1>
+    <p class="text-muted mb-3">Choose a profile to see its watch stats.</p>
+
+    <!-- Profile filter -->
+    <div id="profileFilter" class="profile-filter mb-4">
+      <!-- chips injected by /js/mygraphs.js -->
+    </div>
 
     <div class="row g-4">
+      <!-- LEFT: Time watched -->
       <div class="col-12 col-lg-6">
-        <div class="card shadow-sm">
+        <div class="card graph-card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Daily Views (last 14 days)</h5>
-            <canvas id="dailyViewsChart" height="220"></canvas>
+            <h5 class="card-title mb-3">Time watched</h5>
+            <canvas id="timeWatchedChart" height="220"></canvas>
+            <div id="timeWatchedEmpty" class="no-data-text d-none">
+              No watch data yet for this profile.
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- RIGHT: Liked genres -->
       <div class="col-12 col-lg-6">
-        <div class="card shadow-sm">
+        <div class="card graph-card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Most Popular Movie Genres</h5>
-            <canvas id="popularGenresChart" height="220"></canvas>
+            <h5 class="card-title mb-3">Liked genres</h5>
+            <canvas id="likedGenresChart" height="220"></canvas>
+            <div id="likedGenresEmpty" class="no-data-text d-none">
+              No liked content yet for this profile.
+            </div>
           </div>
         </div>
       </div>
     </div>
   </main>
+
+  <script src="/js/navbar.js" defer></script>
   <script src="/js/mygraphs.js" defer></script>
 </body>
 </html>

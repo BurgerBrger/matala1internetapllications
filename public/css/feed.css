@@ -328,6 +328,57 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .feed-header .btn { min-width: 90px; padding: 6px 8px; font-size: 12px; }
 }
 
+
+/* Tablet: stack title above actions and allow wrapping */
+@media (max-width: 992px) {
+  .feed-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .feed-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .feed-search {
+    margin-left: 0;   /* don't push to far right */
+  }
+}
+
+/* Small phones */
+@media (max-width: 576px) {
+  .feed-header {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .feed-header .btn {
+    min-width: auto;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .feed-header-actions {
+    gap: 6px;
+  }
+
+  .feed-search {
+    width: 100%;
+  }
+
+  .feed-search .search-box {
+    width: 100%;
+  }
+
+  .feed-search input {
+    width: 100%;
+  }
+}
+
+
 /* feed items */
 
 .feed-row {
@@ -588,6 +639,33 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
 .feed-search .search-box {
   min-width: 180px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #222;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+  padding: 5px;
+}
+
+.search-box button {
+  background: transparent;
+  border: none;
+  color: lightgray;
+  cursor: pointer;
+}
+
+.navbar-custom .search-box {
+  display: none;
 }
 
 

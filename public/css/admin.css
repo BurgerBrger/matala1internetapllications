@@ -46,3 +46,66 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   margin: 20px auto;
   max-width: 90%;
 }
+
+.content-table-wrapper {
+  max-width: 90%;
+  margin: 20px auto;
+  overflow-x: auto;          /* horizontal scroll on small screens */
+}
+
+/* Make table a bit denser on small screens */
+@media (max-width: 768px) {
+  .admin-content .admin-header {
+    max-width: 90%;
+    margin: 20px auto 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .content-table th,
+  .content-table td {
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .content-table th:nth-child(5),
+  .content-table td:nth-child(5) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.content-table-wrapper {
+  max-width: 90%;
+  margin: 20px auto;
+  overflow-x: auto;          /* horizontal scroll on small screens */
+}
+
+/* Make table a bit denser on small screens */
+@media (max-width: 768px) {
+  .admin-content .admin-header {
+    max-width: 90%;
+    margin: 20px auto 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  #contentTable th,
+  #contentTable td {
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  /* Optional: clamp the “Genres” column */
+  #contentTable th:nth-child(6),
+  #contentTable td:nth-child(6) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

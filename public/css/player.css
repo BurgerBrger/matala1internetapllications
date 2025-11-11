@@ -72,7 +72,69 @@
   .player .poster-in-hero { width: 130px; }
 }
 
+/* existing hero styles ... */
+
+@media (max-width: 768px) {
+  .player .topContent {
+    height: auto;
+    min-height: 320px;
+  }
+
+  .player .topContentInfo {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .player .player-hero-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .player .poster-in-hero {
+    height: 260px;
+  }
+
+  .player .topContent .buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .player .poster-in-hero {
+    width: 130px;
+    height: auto;
+  }
+}
+
+
 /* --- Episode progress bar --- */
+
+/* Base episode progress bar */
+.episode-progress {
+  position: relative;
+  height: 4px;                       /* you can bump to 5–6px if you want it even bolder */
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+/* Inner bar – assuming the inner div is what gets the width% */
+.episode-progress > div {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);  /* default non-selected */
+}
+
+/* When the episode is selected (list item is active) */
+.list-group-item.active .episode-progress {
+  background: rgba(0, 0, 0, 0.45);       /* darker track for contrast on red */
+}
+
+.list-group-item.active .episode-progress > div {
+  background: #ffffff;                   /* bright white, very visible */
+}
+
+
 .list-group-item .episode-progress {
   height: 4px;
   border-radius: 999px;
@@ -153,7 +215,7 @@
 .similar-card:hover .similar-card-overlay {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 
@@ -211,4 +273,84 @@
   background-color: rgba(255, 255, 255, 0.1);
   color: #fff;
   border-radius: 12px;
+}
+
+/* --- Custom video control overlay --- */
+.video-shell {
+  position: relative;
+}
+
+.player-controls-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: 35px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 5;
+}
+
+.player-controls-overlay .control-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+
+.player-controls-overlay .control-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.player-controls-overlay .control-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.player-controls-overlay .icon-10 {
+  width: 26px;
+  height: 26px;
+}
+
+/* --- Episode list look & feel --- */
+.player .list-group-item {
+  background-color: #000;                           /* dark background */
+  color: #fff;                                      /* white text */
+  border: 1px solid rgba(255, 255, 255, 0.7);       /* white outline */
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.player .list-group-item small {
+  color: #ccc;
+}
+
+/* hover / focus for clickable rows */
+.player .list-group-item-action:hover,
+.player .list-group-item-action:focus {
+  background-color: #111;
+  color: #fff;
+  border-color: #fff;
+}
+
+/* active (current) episode */
+.player .list-group-item.active,
+.player .list-group-item.active:hover,
+.player .list-group-item.active:focus {
+  background-color: var(--main-color);              /* red fill */
+  border-color: #fff;
+  color: #fff;
 }

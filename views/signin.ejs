@@ -14,7 +14,7 @@
 <body>
   <div class="card">
     
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Top Image" class="topimg mt-10px mb-3 d-block mx-auto"></img>
+    <img src="/images/Neetflix_logo.svg" alt="Top Image" class="topimg mt-10px mb-3 d-block mx-auto"></img>
     <h1>Log in to your account</h1>
   
     <form id="loginForm" method="post" action="/signin">
@@ -27,7 +27,7 @@
       
       <div class="form-group" id="grp-password">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password">
+        <input type="password" id="password" name="password" value="<%= typeof password !== 'undefined' ? password : '' %>">
         <p class="error-text"></p>
         <span class="error-icon">!</span>
       </div>
@@ -37,7 +37,7 @@
         <label for="remember">Remember Me</label>
       </div>
       
-      <button type="button" class="btn_log" id="log-in-btn">
+      <button type="submit" class="btn_log" id="log-in-btn">
         <span class="spinner"></span>
         <span class="btn-label">Log In</span>
       </button>

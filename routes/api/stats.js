@@ -1,8 +1,11 @@
 // routes/api/stats.js
-const router = require('express').Router();
-const s = require('../../controllers/stats');
+const router = require("express").Router();
+const s = require("../../controllers/stats");
 
-router.get('/daily-views', s.dailyViews);
-router.get('/popular-genres', s.popularGenres);
+// LEFT graph: time watched (last 14 days)
+router.get("/time-watched", s.timeWatched);
+
+// RIGHT graph: liked genres
+router.get("/liked-genres", s.likedGenres);
 
 module.exports = router;

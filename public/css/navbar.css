@@ -10,134 +10,181 @@
   --main-color: #db0000;
   --dark-main-color: #831010;
   --secondary-color: #929292;
-  --dark-tab-color: #242d33;
-  --dark-background-color: #294444;
 }
+
+/* === BASE NAVBAR === */
 
 body {
-  background: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+  background-color: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* ===== NAVBAR ===== */
 .navbar-custom {
   position: fixed;
-  z-index: 9999;
-  background-color:rgba(0, 0, 0, .75);
-  backdrop-filter:blur(10px);
+  top: 0;
+  left: 0;
+  right: 0;
   height: 60px;
-  width: 100%;
+  padding: 0 24px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.4));
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  z-index: 9999;
 }
 
-/* ===== LEFT SECTION ===== */
-
-.left-section {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-}
-
-.logo img {
-  height: 30px;
-  width: auto;
-  margin-right: 20px;
-}
-
-/* ===== LINKS ===== */
-.nav-links {
-  display: flex;
-  gap: 20px;
-}
-.nav-links a {
-  color: lightgray ;
-  text-decoration: none;
-  /* font-weight: bold; */
-  display: inline-block;
-  transition: color 0.3s;
-}
-.nav-links a:hover {
-  color: white;
-}
-
-/* ===== RIGHT SECTION ===== */
+.left-section,
 .right-section {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 18px;
 }
 
-/* אייקונים של Bootstrap */
+.logo img {
+  height: 32px;
+}
+
+/* Links */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: 24px;
+}
+
+.nav-links a {
+  color: #e5e5e5;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.nav-links a:hover {
+  color: #fff;
+}
+
+/* Icons + buttons on the right */
+
 .icon {
-  font-size: 22px;     /* גודל האייקון */
-  color: lightgray;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: color 0.3s;
+  color: #e5e5e5;
 }
+
 .icon:hover {
-  color:white;
+  color: #fff;
 }
 
-/* כפתור Logout */
-.logout-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 22px;     /* גודל אייקון */
-  color: lightgray;
-  transition: color 0.3s;
-}
-.logout-btn:hover {
-  color: var(--main-color);
-}
-
-/* Switch Profile button */
 .switch-profile-btn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: lightgray;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #e5e5e5;
   border-radius: 18px;
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: 0.85rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
+
 .switch-profile-btn:hover {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  border-color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.1);
+  border-color: #fff;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
-  background: #222;
-  border-radius: 4px;
-  padding: 2px 5px;
-}
-
-.search-box input {
+.logout-btn {
   background: transparent;
   border: none;
-  color: white;
-  outline: none;
-  padding: 5px;
-}
-
-.search-box button {
-  background: transparent;
-  border: none;
-  color: lightgray;
+  color: #e5e5e5;
+  font-size: 1.2rem;
   cursor: pointer;
 }
 
-.navbar-custom .search-box {
-  display: none;
+.logout-btn:hover {
+  color: #fff;
+}
+
+/* === HAMBURGER (MOBILE ONLY) === */
+
+.menu-toggle {
+  display: none;  /* hidden by default (desktop) */
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* === DESKTOP (>= 769px) === */
+
+@media (min-width: 769px) {
+  .navbar-custom {
+    padding: 0 32px;
+  }
+
+  .nav-links {
+    position: static;
+    background: transparent;
+    flex-direction: row;
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: none;   /* NEVER show hamburger on wide screens */
+  }
+}
+
+/* === TABLET & MOBILE (<= 768px) === */
+
+@media (max-width: 768px) {
+  .navbar-custom {
+    padding: 0 12px;
+  }
+
+  .left-section {
+    gap: 10px;
+  }
+
+  .right-section {
+    gap: 10px;
+  }
+
+  /* Show hamburger */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+  }
+
+  /* Hide inline nav, turn it into dropdown */
+  .nav-links {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 60px;
+    background: rgba(0,0,0,0.95);
+    padding: 10px 16px 12px;
+    flex-direction: column;
+    gap: 10px;
+    display: none;  /* hidden until .open is added */
+  }
+
+  .nav-links a {
+    display: block;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  /* Optional: hide text in Switch Profile and keep only the icon */
+  .switch-profile-btn span {
+    display: none;
+  }
 }

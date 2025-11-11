@@ -1,47 +1,30 @@
 <!-- Amit-Berger-207800681-Neetai-Nezer-El-322921594 -->
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NavBar</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/navbar.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
-</head>
-<body>
-  <header class="navbar-custom">
-
-    <div class="d-flex align-items-center">
-      <div class="logo">
-        <img src="/images/Netflix_logo.svg" alt="logo">
-      </div>
-      <nav class="nav-links">
-        <a href="/feed">HOME</a>
-        <a href="/mygraphs">MY GRAFS</a>
-        <a href="#">TV SHOWS</a>
-        <a href="#">MOVIES</a>
-        <a href="#">GAMES</a>
-        <a href="#">POPULAR</a>
-      </nav>
+<header class="navbar-custom">
+  <div class="left-section">
+    <div class="logo">
+      <img src="/images/Neetflix_logo.svg" alt="logo">
     </div>
-    <div class="right-section">
-      <i class="bi bi-bell-fill icon"></i>
-      <span id="userEmail" class="me-2"></span>
-      <i class="bi bi-person-circle icon"></i>
-      <button id="switchProfileBtn" class="switch-profile-btn" title="Switch Profile">
-        <i class="bi bi-people"></i>
-        <span class="d-none d-sm-inline">Switch Profile</span>
-      </button>
-      <button id="logoutBtn" class="logout-btn">
-        <i class="bi bi-box-arrow-right"></i>
-      </button>
-    </div>
-  </header>
 
-  <script src="/js/navbar.js" defer></script>
-  
-</body>
-</html>
+    <!-- Mobile hamburger -->
+    <button class="menu-toggle" type="button" aria-label="Toggle navigation">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <nav class="nav-links">
+      <a href="/feed">HOME</a>
+      <a href="/mygraphs">MY GRAPHS</a>
+    </nav>
+  </div>
+
+  <div class="right-section">
+    <i class="bi bi-bell-fill icon"></i>
+    <button id="switchProfileBtn" class="switch-profile-btn" title="Switch Profile">
+      <i class="bi bi-people"></i>
+      <span class="d-none d-sm-inline">Switch Profile</span>
+    </button>
+    <button id="logoutBtn" class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  </div>
+</header>

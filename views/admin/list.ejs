@@ -3,66 +3,296 @@
 <head>
   <meta charset="utf-8"/>
   <title>Admin • Content</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/admin.css"/>
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
   <style>
-    .admin-header { display:flex; justify-content:space-between; align-items:center; margin:16px 0; }
-    table { width:100%; border-collapse: collapse; }
-    th, td { border-bottom:1px solid #444; padding:8px; text-align:left; }
-    a.btn, button.btn { padding:6px 10px; border:1px solid #777; background:#111; color:#fff; cursor:pointer; }
-    .thumb { height:48px; width:80px; object-fit:cover; }
+    .content-shell {
+      background-color: #111;
+      color: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    }
+
+    .admin-header-bar h1 {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+
+    .admin-header-bar p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+
+    .thumb {
+      width: 80px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .pill-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #eee;
+    }
+
+    .pill-type.movie { border-color: #0d6efd; }
+    .pill-type.tv    { border-color: #ffc107; }
+
+    .content-filters .form-control,
+    .content-filters .form-select {
+      background-color: #222;
+      border-color: #444;
+      color: #eee;
+      font-size: 0.9rem;
+    }
+
+    .content-filters .form-control::placeholder {
+      color: #777;
+    }
+
+    .content-filters .form-control:focus,
+    .content-filters .form-select:focus {
+      border-color: var(--main-color);
+      box-shadow: 0 0 0 0.1rem rgba(219,0,0,0.4);
+    }
+
+    .btn-outline-light.btn-sm {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+    }
   </style>
 </head>
 
-<body>
+<body class="admin-content">
 
-    <%- include('../partial/adminNavbar.ejs') %>
+  <!-- If you have a separate admin navbar partial, include it here -->
+  <%- include('../partial/adminNavbar.ejs') %>
+
 
   <main class="admin-content">
-
     <div class="topSpacer"></div>
 
-    <div class="admin-header">
-      <h1>Content (Admin)</h1>
-      <a class="btn" href="/admin/content/new">+ Add New</a>
-    </div>
+    <!-- Header -->
+    <section class="admin-header content-shell admin-header-bar mb-3 mt-3 d-flex flex-wrap
+                    align-items-center justify-content-between gap-2">
+      <div>
+        <h1>Content library</h1>
+        <p>Browse, search and manage all movies & TV shows.</p>
+      </div>
+      <div>
+        <a href="/admin/content/new" class="btn btn-danger">
+          + Add new content
+        </a>
+      </div>
+    </section>
 
-    <table class="content-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Year</th>
-          <th>Genres</th>
-          <th>Poster</th>
-          <th>Thumbnail</th>
-          <th>Video</th>
-          <th>Likes</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% items.forEach(i => { %>
-          <tr>
-            <td><%= i.id %></td>
-            <td><%= i.name %></td>
-            <td><%= i.type %></td>
-            <td><%= i.year %></td>
-            <td><%= (i.genre || []).join(", ") %></td>
-            <td><%= i.image ? '✔' : '' %></td>
-            <td><%= i.wideimage ? '✔' : '' %></td>
-            <td><%= i.trailer ? '✔' : '' %></td>
-            <td><%= i.numberOfLikes ?? i.numberoflikes ?? 0 %></td>
-            <td>
-              <a class="btn" href="/admin/content/<%= i.id %>/edit">Edit</a>
-              <form style="display:inline" method="POST" action="/admin/content/<%= i.id %>?_method=DELETE">
-                <button class="btn" type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <!-- Filters -->
+    <section class="content-filters content-shell mb-3 d-flex flex-wrap align-items-center gap-2">
+      <div class="flex-grow-1">
+        <label class="form-label mb-1">Search</label>
+        <input id="filterSearch" type="text" class="form-control"
+               placeholder="Search by title, genre, year...">
+      </div>
+
+      <div>
+        <label class="form-label mb-1">Type</label>
+        <select id="filterType" class="form-select">
+          <option value="">All</option>
+          <option value="movie">Movies</option>
+          <option value="tv">TV Shows</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label mb-1">Sort by</label>
+        <select id="sortBy" class="form-select">
+          <option value="id">ID</option>
+          <option value="name">Title (A–Z)</option>
+          <option value="year">Year (newest)</option>
+          <option value="likes">Likes (most)</option>
+          <option value="rating">TMDB Rating</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section class="content-table content-shell mb-4">
+      <div class="content-table-wrapper">
+        <table class="table table-dark table-hover align-middle mb-0" id="contentTable">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th style="width: 110px;">Poster</th>
+              <th>Title</th>
+              <th style="width: 110px;">Type</th>
+              <th style="width: 90px;">Year</th>
+              <th>Genres</th>
+              <th style="width: 80px;">Likes</th>
+              <th style="width: 120px;">TMDB</th>
+              <th style="width: 170px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="contentTableBody">
+            <% (items || []).forEach(function (i) { %>
+              <tr
+                data-id="<%= i.id %>"
+                data-name="<%= (i.name || '').toLowerCase() %>"
+                data-type="<%= (i.type || '').toLowerCase() %>"
+                data-genres="<%= (Array.isArray(i.genre) ? i.genre.join(',').toLowerCase() : '') %>"
+                data-year="<%= i.year || '' %>"
+                data-likes="<%= i.numberOfLikes ?? i.numberoflikes ?? 0 %>"
+                data-rating="<%= (i.tmdbRating || (i.tmdb && i.tmdb.rating) || 0) %>"
+              >
+                <td>#<%= i.id %></td>
+                <td>
+                  <% if (i.image) { %>
+                    <img src="<%= i.image %>" alt="<%= i.name %>" class="thumb">
+                  <% } else { %>
+                    <span class="text-muted">No image</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="fw-semibold"><%= i.name %></div>
+                  <% if (i.overview) { %>
+                    <div class="text-muted small text-truncate" style="max-width: 320px;">
+                      <%= i.overview %>
+                    </div>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="pill-type <%= (i.type || '').toLowerCase() %>">
+                    <%= (i.type || '').toUpperCase() %>
+                  </span>
+                </td>
+                <td><%= i.year || '-' %></td>
+                <td>
+                  <% if (Array.isArray(i.genre) && i.genre.length) { %>
+                    <%= i.genre.join(', ') %>
+                  <% } else { %>
+                    <span class="text-muted small">None</span>
+                  <% } %>
+                </td>
+                <td><%= i.numberOfLikes ?? i.numberoflikes ?? 0 %></td>
+                <td>
+                  <% const rating = i.tmdbRating || (i.tmdb && i.tmdb.rating); %>
+                  <% const votes  = i.tmdbVoteCount || (i.tmdb && i.tmdb.votes); %>
+                  <% if (rating) { %>
+                    <span class="badge bg-success">★ <%= rating.toFixed(1) %></span>
+                    <% if (votes) { %>
+                      <span class="text-muted small ms-1">(<%= votes %>)</span>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-muted small">No rating</span>
+                  <% } %>
+                </td>
+                <td>
+                  <a class="btn btn-outline-light btn-sm me-1"
+                     href="/admin/content/<%= i.id %>/edit">
+                    Edit
+                  </a>
+
+                    <form method="POST"
+                        action="/admin/content/<%= i.id %>/delete"
+                        style="display:inline"
+                        class="js-delete-form"
+                        data-title="<%- (i.name || '').replace(/"/g, '&quot;') %>">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById('filterSearch');
+      const typeSelect  = document.getElementById('filterType');
+      const sortSelect  = document.getElementById('sortBy');
+      const tbody       = document.getElementById('contentTableBody');
+
+      function getRows() {
+        return Array.from(tbody.querySelectorAll('tr'));
+      }
+
+      function applyFiltersAndSort() {
+        const q      = (searchInput.value || '').toLowerCase().trim();
+        const type   = (typeSelect.value || '').toLowerCase();
+        const sortBy = sortSelect.value || 'id';
+
+        let rows = getRows();
+
+        // filter
+        rows.forEach(row => {
+          const name   = row.dataset.name || '';
+          const genres = row.dataset.genres || '';
+          const year   = row.dataset.year || '';
+          const rType  = row.dataset.type || '';
+
+          let ok = true;
+
+          if (q) {
+            ok = name.includes(q) || genres.includes(q) || String(year).includes(q);
+          }
+
+          if (ok && type) {
+            ok = rType === type;
+          }
+
+          row.style.display = ok ? '' : 'none';
+        });
+
+        // sort visible rows only
+        rows = rows.filter(r => r.style.display !== 'none');
+
+        rows.sort((a, b) => {
+          const av = a.dataset;
+          const bv = b.dataset;
+
+          if (sortBy === 'name') {
+            return (av.name || '').localeCompare(bv.name || '');
+          }
+          if (sortBy === 'year') {
+            return (Number(bv.year || 0) - Number(av.year || 0));
+          }
+          if (sortBy === 'likes') {
+            return (Number(bv.likes || 0) - Number(av.likes || 0));
+          }
+          if (sortBy === 'rating') {
+            return (Number(bv.rating || 0) - Number(av.rating || 0));
+          }
+          // id
+          return (Number(av.id || 0) - Number(bv.id || 0));
+        });
+
+        rows.forEach(r => tbody.appendChild(r));
+      }
+
+      searchInput.addEventListener('input', applyFiltersAndSort);
+      typeSelect.addEventListener('change', applyFiltersAndSort);
+      sortSelect.addEventListener('change', applyFiltersAndSort);
+
+      applyFiltersAndSort();
+    })();
+    
+  </script>
+
+  <script src="/js/navbar.js" defer></script>
 </body>
 </html>

@@ -36,12 +36,16 @@ function profileCard(p) {
   const img = p.image || "/images/profile/default.jpg";
   // treat profile as admin if it explicitly has usernumber 3 (special admin) or id/name fallback
   const isAdmin = Number(p.usernumber) === 3 || Number(p.id) === 0 || (p.name || "").toLowerCase() === "admin";
+
+  const ownerLine = p.ownerEmail ? `<p class="profile-owner-email">${p.ownerEmail}</p>` : "";
+  
   if (!EDIT_MODE) {
     return `
       <div class="col-6 col-md-4 col-lg-2">
         <div class="card p-2" data-id="${p.id}" data-name="${p.name}">
           <img src="${img}" class="card-img-top" alt="${p.name}">
           <p class="name mt-2">${p.name}</p>
+          ${ownerLine}
         </div>
       </div>`;
   }

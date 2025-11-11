@@ -100,7 +100,7 @@ input {
 }
 
 .btn_log.success {
-  background-color: green;
+  background-color: var(--main-color)
 }
 
 .btn_log .spinner {
