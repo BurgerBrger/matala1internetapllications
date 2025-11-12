@@ -1,56 +1,135 @@
 // controllers/stats.js
-const Profile = require('../models/mongo/Profile');
-const Content = require('../models/mongo/Content');
+const Profile = require("../models/mongo/Profile");
 
-// GET /api/stats/daily-views?days=14
-// Counts completed watch events per day over the last N days (movies or episodes)
-exports.dailyViews = async (req, res, next) => {
+
+function lastNDays(n) {
+  const days = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    const label = d.toLocaleDateString("he-IL", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+    days.push({ key, label });
+  }
+  return days;
+}
+
+/**
+ * LEFT GRAPH:
+ * GET /api/stats/time-watched?profileId=123
+ * → time watched per day (minutes) for last 14 days
+ */
+exports.timeWatched = async (req, res, next) => {
   try {
-    const days = Math.max(1, Math.min(90, Number(req.query.days) || 14));
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-
-    // Prefer ViewEvent collection if present (more accurate event stream)
-    const mongoose = require('mongoose');
-    let rows;
-    if (mongoose.models.ViewEvent) {
-      rows = await mongoose.models.ViewEvent.aggregate([
-        { $match: { createdAt: { $gte: since } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } }, count: { $sum: 1 } } },
-        { $sort: { _id: 1 } }
-      ]);
-    } else {
-      // Fallback: derive from Profile.watchProgress completions
-      rows = await Profile.aggregate([
-        { $unwind: "$watchProgress" },
-        { $match: { "watchProgress.completed": true, "watchProgress.updatedAt": { $gte: since } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$watchProgress.updatedAt", timezone: "UTC" } }, count: { $sum: 1 } } },
-        { $sort: { _id: 1 } }
-      ]);
+    const profileId = Number(req.query.profileId || 0);
+    if (!profileId) {
+      return res.status(400).json({ labels: [], data: [] });
     }
 
-    res.json({ days, data: (rows || []).map(r => ({ date: r._id, count: r.count })) });
-  } catch (e) { next(e); }
+    const profile = await Profile.findOne({ id: profileId }).lean();
+    if (!profile) {
+      return res.json({ labels: [], data: [] });
+    }
+
+    const progress = Array.isArray(profile.watchProgress)
+      ? profile.watchProgress
+      : [];
+
+    if (!progress.length) {
+      return res.json({ labels: [], data: [] });
+    }
+
+    // Setup buckets for last 14 days
+    const days = lastNDays(14);
+    const buckets = {};
+    days.forEach((d) => {
+      buckets[d.key] = 0; // seconds
+    });
+
+    const oldestKey = days[0].key;
+    const oldestDate = new Date(oldestKey);
+    oldestDate.setHours(0, 0, 0, 0);
+
+    // Sum watch time (seconds) per day within the last 14 days
+    for (const item of progress) {
+      if (!item.updatedAt) continue;
+      const d = new Date(item.updatedAt);
+      if (d < oldestDate) continue;
+
+      d.setHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+
+      if (!(key in buckets)) continue;
+
+      const seconds = Number(item.position || item.duration || 0);
+      if (!seconds || seconds < 0) continue;
+
+      buckets[key] += seconds;
+    }
+
+    const labels = [];
+    const data = [];
+
+    days.forEach((d) => {
+      labels.push(d.label);
+      const secs = buckets[d.key] || 0;
+      data.push(Math.round(secs / 60)); // minutes
+    });
+
+    res.json({ labels, data });
+  } catch (err) {
+    next(err);
+  }
 };
 
-// GET /api/stats/popular-genres?limit=10
-// Aggregates total likes per movie genre across all Content documents
-exports.popularGenres = async (req, res, next) => {
-  try {
-    const limit = Math.max(1, Math.min(20, Number(req.query.limit) || 10));
-    const rows = await Content.aggregate([
-      { $match: { type: 'movie' } },
-      { $unwind: "$genre" },
-      {
-        $group: {
-          _id: "$genre",
-          likes: { $sum: { $ifNull: ["$numberOfLikes", { $ifNull: ["$numberoflikes", 0] }] } },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { likes: -1 } },
-      { $limit: limit }
-    ]);
+/**
+ * RIGHT GRAPH (you already have / will have this):
+ * GET /api/stats/liked-genres?profileId=123
+ * → genre distribution from profile.liked + Content.genre
+ */
+const Content = require("../models/mongo/Content");
 
-    res.json({ data: rows.map(r => ({ genre: r._id, likes: r.likes, titles: r.count })) });
-  } catch (e) { next(e); }
+exports.likedGenres = async (req, res, next) => {
+  try {
+    const profileId = Number(req.query.profileId || 0);
+    if (!profileId) {
+      return res.status(400).json({ labels: [], data: [] });
+    }
+
+    const profile = await Profile.findOne({ id: profileId }).lean();
+    if (!profile) {
+      return res.json({ labels: [], data: [] });
+    }
+
+    const likedIds = Array.isArray(profile.liked) ? profile.liked : [];
+    if (!likedIds.length) {
+      return res.json({ labels: [], data: [] });
+    }
+
+    const contents = await Content.find(
+      { id: { $in: likedIds } },
+      { id: 1, genre: 1 }
+    ).lean();
+
+    const counts = {};
+    contents.forEach((c) => {
+      (c.genre || []).forEach((g) => {
+        if (!g) return;
+        counts[g] = (counts[g] || 0) + 1;
+      });
+    });
+
+    const labels = Object.keys(counts);
+    const data = labels.map((g) => counts[g]);
+
+    res.json({ labels, data });
+  } catch (err) {
+    next(err);
+  }
 };

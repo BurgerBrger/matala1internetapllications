@@ -49,4 +49,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) el.textContent = data.email || '';
       }
     }).catch(() => {});
+
+    // Mobile navbar toggle
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks   = document.querySelector('.nav-links');
+
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    // Optional: close menu when clicking a link
+    navLinks.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        navLinks.classList.remove('open');
+      }
+    });
+  }
+
 });

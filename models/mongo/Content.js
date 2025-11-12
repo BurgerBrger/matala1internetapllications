@@ -6,6 +6,7 @@ const ContentSchema = new mongoose.Schema(
     id: { type: Number, index: true, unique: true },
     type: { type: String, enum: ["movie", "tv"], default: "movie" },
     name: { type: String, required: true },
+    overview: { type: String },
     year: Number,
     genre: { type: [String], default: [] },
     numberOfLikes: { type: Number, default: 0 },

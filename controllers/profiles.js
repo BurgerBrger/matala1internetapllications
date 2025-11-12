@@ -9,33 +9,79 @@ const User = require("../models/mongo/users");
 // list - return only profiles visible to the logged-in user
 exports.list = async (req, res, next) => {
   try {
-    // DEBUG: log basic session info to help debug which user is requesting profiles
+    // DEBUG remains as you had it
     try {
-      const dbgSession = { hasSession: !!req.session, userId: req.session?.userId, userEmail: req.session?.userEmail, usernumber: req.session?.usernumber };
+      const dbgSession = {
+        hasSession: !!req.session,
+        userId: req.session?.userId,
+        userEmail: req.session?.userEmail,
+        usernumber: req.session?.usernumber
+      };
       console.log('DEBUG GET /api/profiles - session:', dbgSession);
-    } catch (e) { console.error('DEBUG session read error', e); }
+    } catch (e) {
+      console.error('DEBUG session read error', e);
+    }
 
-    if (!req.session || !req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const user = await User.findById(req.session.userId).lean();
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-    // New ownership model: user document stores an array `profiles` with numeric profile ids
-    let filter = {};
-    if (Array.isArray(user.profiles) && user.profiles.length > 0) {
-      filter = { id: { $in: user.profiles } };
+    const isAdmin =
+      user.email === 'admin@example.com' ||
+      user.usernumber === 3;
+
+    let docs;
+
+    if (isAdmin) {
+      // ADMIN: see ALL profiles
+      console.log('DEBUG GET /api/profiles - admin user, returning all profiles');
+
+      docs = await Profile.find({}).sort({ id: 1 }).lean();
+
+      // Build map: profileId -> owner email
+      const users = await User.find({}, { email: 1, profiles: 1 }).lean();
+      const ownerById = {};
+      users.forEach(u => {
+        if (!Array.isArray(u.profiles)) return;
+        u.profiles.forEach(pid => {
+          const idNum = Number(pid);
+          if (!ownerById[idNum]) {
+            ownerById[idNum] = u.email;
+          }
+        });
+      });
+
+      // attach ownerEmail to profiles
+      docs.forEach(p => {
+        p.ownerEmail = ownerById[p.id] || null;
+      });
     } else {
-      // nothing to show for this user
-      console.log('DEBUG GET /api/profiles - user has no profiles array or it is empty');
-      return res.json([]);
+      // NORMAL USER: only own profiles
+      let filter = {};
+      if (Array.isArray(user.profiles) && user.profiles.length > 0) {
+        filter = { id: { $in: user.profiles } };
+      } else {
+        console.log('DEBUG GET /api/profiles - user has no profiles array or it is empty');
+        return res.json([]);
+      }
+
+      console.log('DEBUG GET /api/profiles - computed filter (by ids):', JSON.stringify(filter));
+
+      docs = await Profile.find(filter).sort({ id: 1 }).lean();
     }
 
-    console.log('DEBUG GET /api/profiles - computed filter (by ids):', JSON.stringify(filter));
-
-    const docs = await Profile.find(filter).sort({ id: 1 }).lean();
-    console.log('DEBUG GET /api/profiles - returning', Array.isArray(docs) ? docs.length : 0, 'profiles');
+    console.log(
+      'DEBUG GET /api/profiles - returning',
+      Array.isArray(docs) ? docs.length : 0,
+      'profiles'
+    );
     res.json(docs);
+  } catch (e) {
+    next(e);
   }
-  catch (e) { next(e); }
 };
 
 // get

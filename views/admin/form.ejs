@@ -3,90 +3,366 @@
 <head>
   <meta charset="utf-8"/>
   <title><%= item ? "Edit" : "New" %> Content</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/admin.css"/>
   <link rel="stylesheet" href="/css/feed.css"/>
+  <link rel="stylesheet" href="/css/navbar.css">
+  
   <style>
-    
+    .content-form-shell {
+      background-color: #111;
+      color: #fff;
+      border-radius: 12px;
+      padding: 20px 22px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      max-width: 1100px;
+      margin: 0 auto 40px auto;
+    }
+    .content-form-shell h1 {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+    .content-form-shell p {
+      margin: 0 0 12px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr;
+      gap: 18px;
+    }
+    @media (max-width: 960px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .field-group {
+      margin-bottom: 12px;
+    }
+    .field-group label {
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+      color: #ddd;
+    }
+    .field-group small {
+      display: block;
+      font-size: 0.75rem;
+      color: #888;
+    }
+    .field-group input,
+    .field-group textarea,
+    .field-group select {
+      background-color: #222;
+      border-color: #444;
+      color: #f5f5f5;
+    }
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus {
+      border-color: var(--main-color);
+      box-shadow: 0 0 0 0.1rem rgba(219,0,0,0.4);
+    }
+    .poster-preview,
+    .wide-preview {
+      border-radius: 8px;
+      background-color: #000;
+      object-fit: cover;
+    }
+    .poster-preview {
+      width: 160px;
+      height: 240px;
+    }
+    .wide-preview {
+      width: 100%;
+      max-width: 340px;
+      height: 160px;
+    }
+    .episodes-list {
+      max-height: 240px;
+      overflow-y: auto;
+      background-color: #151515;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.82rem;
+    }
   </style>
 </head>
 <body>
 
+  <!-- If you have an admin navbar partial, include it -->
   <%- include('../partial/adminNavbar.ejs') %>
+
 
   <main class="admin-content">
     <div class="topSpacer"></div>
 
-    <h1><%= item ? "Edit" : "New" %> Content</h1>
+    <section class="content-form-shell mt-3">
+      <header class="mb-3">
+        <h1><%= item ? "Edit content" : "Add new content" %></h1>
+        <p>
+          <%= item ? "Update the movie/show metadata, images and assets." : "Create a new movie or TV show in the catalog." %>
+        </p>
+      </header>
 
-    <form method="POST"
-          action="<%= item ? ("/admin/content/" + item.id + "?_method=PUT") : "/admin/content" %>"
-          enctype="multipart/form-data">
+      <form
+        class="content-form"
+        method="POST"
+        enctype="multipart/form-data"
+        action="<%= item ? ('/admin/content/' + item.id) : '/admin/content' %>"
+      >
+        <div class="form-grid">
+          <!-- LEFT: Text metadata -->
+          <div>
+            <div class="field-group">
+              <label for="type">Type</label>
+              <select id="type" name="type" class="form-select">
+                <option value="movie" <%= (item && item.type === 'movie') ? 'selected' : '' %>>Movie</option>
+                <option value="tv"    <%= (item && item.type === 'tv')    ? 'selected' : '' %>>TV Show</option>
+              </select>
+            </div>
 
-      <div class="row">
-        <label>
-          Name
-          <input type="text" name="name" value="<%= item?.name || "" %>" required>
-        </label>
+            <div class="field-group">
+              <label for="name">Title</label>
+              <input id="name" name="name" type="text" class="form-control"
+                     value="<%= item ? item.name : '' %>" required>
+            </div>
 
-        <label>
-          Type
-          <select name="type">
-            <option value="movie" <%= item?.type === "movie" ? "selected" : "" %>>Movie</option>
-            <option value="tv" <%= item?.type === "tv" ? "selected" : "" %>>TV</option>
-          </select>
-        </label>
-      </div>
+            <div class="field-group">
+              <label for="year">Year</label>
+              <input id="year" name="year" type="number" class="form-control"
+                     value="<%= item && item.year ? item.year : '' %>">
+            </div>
 
-      <div class="row">
-        <label>
-          Year
-          <input type="number" name="year" value="<%= item?.year || "" %>">
-        </label>
-        <label>
-          Likes
-          <input type="number" name="numberOfLikes" value="<%= item?.numberOfLikes ?? item?.numberoflikes ?? 0 %>">
-        </label>
-      </div>
+            <div class="field-group">
+              <label for="genres">Genres</label>
+              <input id="genres" name="genres" type="text" class="form-control"
+                     value="<%= item && Array.isArray(item.genre) ? item.genre.join(', ') : '' %>">
+              <small>Comma-separated (e.g. Action, Drama, Thriller).</small>
+            </div>
 
-      <label>
-        Genres (comma separated)
-        <input type="text" name="genres" value="<%= (item?.genre || []).join(", ") %>">
-      </label>
+            <div class="field-group">
+              <label for="overview">Overview / summary</label>
+              <textarea id="overview" name="overview" class="form-control" rows="4"><%= item && item.overview ? item.overview : '' %></textarea>
+            </div>
 
-      <div class="preview">
-        <% if (item?.image) { %><img class="preview-img" src="<%= item.image %>"><% } %>
-        <label>Poster image (JPG/PNG)
-          <input type="file" name="poster" accept="image/*">
-        </label>
-      </div>
+            <div class="field-group">
+              <label for="topActors">Top actors</label>
+              <textarea id="topActors" name="topActors" class="form-control" rows="3"><%= item && Array.isArray(item.topActors) ? item.topActors.join(', ') : '' %></textarea>
+              <small>Comma-separated names. These appear in the player as “starring” buttons.</small>
+            </div>
 
-      <div class="preview">
-        <% if (item?.wideimage) { %><img class="preview-img" src="<%= item.wideimage %>"><% } %>
-        <label>Wide image for hero (JPG/PNG)
-          <input type="file" name="wideimage" accept="image/*">
-        </label>
-      </div>
+            <div class="field-group">
+              <label for="numberOfLikes">Number of likes</label>
+              <input id="numberOfLikes" name="numberOfLikes" type="number" min="0" class="form-control"
+                     value="<%= item ? (item.numberOfLikes ?? item.numberoflikes ?? 0) : 0 %>">
+            </div>
+          </div>
 
-      <div class="preview">
-        <% if (item?.trailer) { %>
-          <video width="320" controls src="<%= item.trailer %>"></video>
-        <% } %>
-        <label>Trailer (MP4)
-          <input type="file" name="trailer" accept="video/mp4">
-        </label>
-      </div>
+          <!-- RIGHT: Images, video, episodes -->
+          <div>
+            <div class="field-group mb-3">
+              <label>Poster (card image)</label>
+              <div class="d-flex flex-wrap align-items-start gap-3">
+                <div>
+                  <% if (item && item.image) { %>
+                    <img src="<%= item.image %>" alt="Poster" class="poster-preview mb-2">
+                  <% } else { %>
+                    <div class="poster-preview mb-2 d-flex align-items-center justify-content-center text-muted small">
+                      No poster
+                    </div>
+                  <% } %>
+                  <div class="small text-muted">
+                    Current: <%= item && item.image ? item.image : "—" %>
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <input type="file" name="poster" accept="image/*" class="form-control form-control-sm">
+                  <small>Upload a new poster (optional).</small>
+                </div>
+              </div>
+            </div>
 
-      <div class="btns">
-        <button class="btn" type="submit"><%= item ? "Save" : "Create" %></button>
-        <a class="btn" href="/admin/content">Cancel</a>
-      </div>
-    </form>
+            <div class="field-group mb-3">
+              <label>Hero wide image</label>
+              <div class="d-flex flex-wrap align-items-start gap-3">
+                <div style="flex:1 1 0;">
+                  <% if (item && item.wideimage) { %>
+                    <img src="<%= item.wideimage %>" alt="Wide" class="wide-preview mb-2">
+                  <% } else { %>
+                    <div class="wide-preview mb-2 d-flex align-items-center justify-content-center text-muted small">
+                      No hero image
+                    </div>
+                  <% } %>
+                  <div class="small text-muted">
+                    Current: <%= item && item.wideimage ? item.wideimage : "—" %>
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <input type="file" name="wideimage" accept="image/*" class="form-control form-control-sm">
+                  <small>Upload a new hero image (optional).</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group mb-3">
+              <label>Video (movie / main trailer)</label>
+              <div class="d-flex flex-column gap-2">
+                <div class="small text-muted">
+                  Current: <%= item && item.video ? item.video : "—" %>
+                </div>
+                <input type="file" name="trailer" accept="video/mp4" class="form-control form-control-sm">
+                <small>MP4 file. Leave empty to keep existing.</small>
+              </div>
+            </div>
+
+            <% if (item && item.type === 'tv') { %>
+              <div class="field-group">
+                <label>Episodes</label>
+                <div id="episodesContainer" class="episodes-list">
+                  <% const eps = Array.isArray(item.episodes) ? item.episodes : []; %>
+                  <% eps.forEach(function(ep, idx) { %>
+                    <div class="row g-2 align-items-center mb-2 episode-row">
+                      <div class="col-1">
+                        <label class="form-label mb-0 small episode-index-label">
+                          Ep <%= idx + 1 %>
+                        </label>
+                      </div>
+                      <div class="col-5">
+                        <label class="form-label mb-0 small">Name</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          name="episodes[<%= idx %>][name]"
+                          value="<%= ep.name %>"
+                          data-field="name">
+                      </div>
+                      <div class="col-5">
+                        <label class="form-label mb-0 small">Video</label>
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          name="episodes[<%= idx %>][video]"
+                          value="<%= ep.video %>"
+                          data-field="video">
+                      </div>
+                      <div class="col-1 d-flex align-items-end">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger btn-remove-episode"
+                          title="Delete episode">
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+
+                <div class="mt-2">
+                  <button type="button" id="btnAddEpisode" class="btn btn-sm btn-outline-light">
+                    + Add episode
+                  </button>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <hr class="border-secondary mt-4 mb-3"/>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="/admin/content" class="btn btn-outline-light">
+            ← Back to list
+          </a>
+          <div class="d-flex gap-2">
+            <% if (item) { %>
+              <button class="btn btn-danger" type="submit">Save changes</button>
+            <% } else { %>
+              <button class="btn btn-danger" type="submit">Create content</button>
+            <% } %>
+          </div>
+        </div>
+      </form>
+    </section>
   </main>
 
-<link rel="stylesheet" href="/css/admin.css">
-<link rel="stylesheet" href="/css/adminNavbar.css">
+  <script>
+  (function () {
+    const container = document.getElementById('episodesContainer');
+    const addBtn    = document.getElementById('btnAddEpisode');
 
-<script src="/js/adminNavbar.js" defer></script>
+    // If this page is not a TV show (e.g. movie), nothing to do
+    if (!container || !addBtn) return;
 
+    function rebuildIndices() {
+      const rows = container.querySelectorAll('.episode-row');
+      rows.forEach((row, idx) => {
+        // Label: Ep 1, Ep 2, ...
+        const label = row.querySelector('.episode-index-label');
+        if (label) label.textContent = 'Ep ' + (idx + 1);
 
+        // Names: episodes[idx][name] / [video]
+        row.querySelectorAll('input[data-field]').forEach(input => {
+          const field = input.dataset.field;
+          input.name = 'episodes[' + idx + '][' + field + ']';
+        });
+      });
+    }
+
+    function addRow() {
+      const row = document.createElement('div');
+      row.className = 'row g-2 align-items-center mb-2 episode-row';
+      row.innerHTML = `
+        <div class="col-1">
+          <label class="form-label mb-0 small episode-index-label">Ep ?</label>
+        </div>
+        <div class="col-5">
+          <label class="form-label mb-0 small">Name</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            data-field="name"
+            value="">
+        </div>
+        <div class="col-5">
+          <label class="form-label mb-0 small">Video</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            data-field="video"
+            value="">
+        </div>
+        <div class="col-1 d-flex align-items-end">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger btn-remove-episode"
+            title="Delete episode">
+            &times;
+          </button>
+        </div>
+      `;
+      container.appendChild(row);
+      rebuildIndices();
+    }
+
+    // Add new episode
+    addBtn.addEventListener('click', addRow);
+
+    // Delete episode (event delegation so it works for new rows too)
+    container.addEventListener('click', function (ev) {
+      const btn = ev.target.closest('.btn-remove-episode');
+      if (!btn) return;
+      const row = btn.closest('.episode-row');
+      if (!row) return;
+      row.remove();
+      rebuildIndices();
+    });
+
+    // Ensure indices are correct on initial render
+    rebuildIndices();
+  })();
+  </script>
+
+  <script src="/js/navbar.js" defer></script>
 </body>
 </html>
