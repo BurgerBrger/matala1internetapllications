@@ -21,7 +21,7 @@ basic_information
             dev version:
                 terminal: npm dev
                 npx nodemon index.js
-            the scripts are in package.json
+            the scripts are in package.json fdf
     
 project structure:
 ├─ controllers/
